@@ -1,18 +1,54 @@
-import React from "react";
-import { useState } from "react";
-import { Eye, EyeOff, Lock, Mail } from "lucide-react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GoogleIcon from "@mui/icons-material/Google";
 
 export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(false); // Giữ checkbox nhưng chỉ dùng để thông báo
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Xử lý logic đăng nhập ở đây
-    console.log("Đăng nhập với:", { email, password });
+    setError(""); // Reset thông báo lỗi
+
+    try {
+      // Gửi yêu cầu đăng nhập tới backend
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/login",
+        {
+          username: username,
+          password: password,
+        }
+      );
+
+      // Lấy JWT từ phản hồi
+      const token = response.data;
+
+      // Luôn lưu token vào localStorage
+      localStorage.setItem("jwtToken", token);
+
+      // Thông báo cho người dùng nếu chọn "Ghi nhớ đăng nhập"
+      if (!rememberMe) {
+        console.log(
+          "Token đã được lưu trong localStorage, nhưng sẽ hết hạn khi đóng trình duyệt nếu không chọn 'Ghi nhớ đăng nhập'."
+        );
+      }
+
+      // Điều hướng tới trang chính sau khi đăng nhập thành công
+      navigate("/");
+    } catch (err) {
+      // Xử lý lỗi đăng nhập
+      setError(
+        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại."
+      );
+      console.error("Lỗi đăng nhập:", err);
+    }
   };
 
   return (
@@ -31,28 +67,35 @@ export default function LoginPage() {
 
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10 border border-gray-200">
+          {/* Hiển thị thông báo lỗi nếu có */}
+          {error && (
+            <div className="mb-4 text-center text-sm text-red-600 bg-red-100 p-2 rounded">
+              {error}
+            </div>
+          )}
+
           <form className="mb-0 space-y-6" onSubmit={handleSubmit}>
             <div>
               <label
-                htmlFor="email"
+                htmlFor="username"
                 className="block text-sm font-medium text-gray-700"
               >
-                Email
+                Tài khoản
               </label>
               <div className="mt-1 relative rounded-md shadow-sm">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Mail className="h-5 w-5 text-gray-400" />
+                  <User className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  name="email"
-                  type="email"
-                  autoComplete="email"
+                  id="username"
+                  name="username"
+                  type="text" // Đã sửa type thành "text"
+                  autoComplete="username"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
                   className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500"
-                  placeholder="you@example.com"
+                  placeholder="Nhập tài khoản của bạn"
                 />
               </div>
             </div>
@@ -101,6 +144,8 @@ export default function LoginPage() {
                   id="remember-me"
                   name="remember-me"
                   type="checkbox"
+                  checked={rememberMe}
+                  onChange={(e) => setRememberMe(e.target.checked)}
                   className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
                 />
                 <label

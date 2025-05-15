@@ -9,6 +9,7 @@ import Products from "./Components/Products.jsx";
 import HomePage from "./Components/HomePage.jsx";
 import LoginPage from "./Components/Account/Login.jsx";
 import RegisterPage from "./Components/Account/Resigter.jsx";
+import CustomerProfile from "./Components/Account/Profile.jsx";
 
 const App = () => {
   return (
@@ -18,6 +19,7 @@ const App = () => {
       <Route element={<Header />}>
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />
+        <Route path="profile" element={<CustomerProfile />} />
         <Route path="product" element={<Products />} />
         <Route path="service" element={<Services />} />
         <Route path="contact" element={<Contacts />} />
