@@ -17,8 +17,8 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
-    @Bean
-    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
-        return config.getAuthenticationManager();
-    }
+//    @Bean
+//    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
+//        return config.getAuthenticationManager();
+//    }
 }

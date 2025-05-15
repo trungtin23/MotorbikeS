@@ -32,6 +32,13 @@ public class AccountServiceImpl implements AccountService {
     }
 
     @Override
+    public AccountDTO getAccountByUsername(String username) {
+        Account account = accountRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("Account not found"));
+        return convertToDTO(account);
+    }
+
+    @Override
     public AccountDTO createAccount(AccountDTO accountDTO) {
         Account account = convertToEntity(accountDTO);
         account = accountRepository.save(account);

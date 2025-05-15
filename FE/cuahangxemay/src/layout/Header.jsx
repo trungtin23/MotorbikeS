@@ -1,8 +1,24 @@
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Search, User, MapPin, Phone } from "lucide-react";
-import { Outlet } from "react-router-dom";
+import { Outlet, useNavigate } from "react-router-dom";
+import { UserContext } from "../Components/contexts/GetUser.jsx";
+// Import context để lấy thông tin người dùng
 
 const Header = () => {
+  const { isLoggedIn, setIsLoggedIn, setUser, isLoading } =
+    useContext(UserContext);
+  console.log(isLoggedIn);
+  const [showMenu, setShowMenu] = useState(false);
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    localStorage.removeItem("jwtToken");
+    setIsLoggedIn(false);
+    setUser(null);
+    setShowMenu(false);
+    navigate("/login");
+  };
+
   return (
     <div className="w-full">
       {/* Top header - contact info */}
@@ -49,8 +65,8 @@ const Header = () => {
             {/* Logo */}
             <a href="/">
               <div className="flex items-center">
-                <div className="flex items-center justify-center  bg-red-600 h-10 w-40 ">
-                  <span className="text-white font-bold text-lg ">
+                <div className="flex items-center justify-center bg-red-600 h-10 w-40">
+                  <span className="text-white font-bold text-lg">
                     T-MOTOSHOP
                   </span>
                 </div>
@@ -97,14 +113,46 @@ const Header = () => {
               </a>
             </nav>
 
-            {/* Right side - Search and User */}
             <div className="flex items-center space-x-4">
-              <button className="text-gray-700 hover:text-red-600">
-                <Search size={20} />
-              </button>
-              <button className="text-gray-700 hover:text-red-600">
-                <User size={20} />
-              </button>
+              <div className="header-btn hidden sm:block sm:absolute sm:right-0 sm:mr-16 lg:static lg:mr-0">
+                {isLoggedIn ? (
+                  <div className="relative">
+                    <button
+                      className="flex items-center focus:outline-none"
+                      onClick={() => setShowMenu(!showMenu)}
+                    >
+                      <img
+                        src="avt.png"
+                        alt="Avatar"
+                        className="w-10 h-10 rounded-full"
+                      />
+                    </button>
+                    {showMenu && (
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <a
+                          href="/profile"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Xem Hồ Sơ
+                        </a>
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Đăng Xuất
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <a
+                    className="text-black-600 border border-black px-10 py-3 square-full duration-300 hover:bg-orange-500 hover:text-white"
+                    href="/login"
+                  >
+                    Đăng Nhập
+                  </a>
+                )}
+              </div>
             </div>
           </div>
         </div>
