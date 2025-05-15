@@ -20,9 +20,20 @@ public class AccountController {
         return ResponseEntity.ok(accountService.getAllAccounts());
     }
 
-    @GetMapping("/{id}")
-    public ResponseEntity<AccountDTO> getAccountById(@PathVariable Integer id) {
-        return ResponseEntity.ok(accountService.getAccountById(id));
+    @GetMapping("/{input}")
+    public ResponseEntity<AccountDTO> getAccount(@PathVariable String input) {
+        try {
+            // Thử parse sang Integer -> là ID
+            Integer id = Integer.parseInt(input);
+            return ResponseEntity.ok(accountService.getAccountById(id));
+        } catch (NumberFormatException e) {
+            // Không phải số -> là username
+            return ResponseEntity.ok(accountService.getAccountByUsername(input));
+        }
+    }
+    @GetMapping("/username/{username}")
+    public ResponseEntity<AccountDTO> getAccountByUsername(@PathVariable String username) {
+        return ResponseEntity.ok(accountService.getAccountByUsername(username));
     }
 
     @PostMapping

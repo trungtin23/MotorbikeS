@@ -1,11 +1,13 @@
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import { Eye, EyeOff, Lock, Mail, User } from "lucide-react";
 import FacebookIcon from "@mui/icons-material/Facebook";
 import GoogleIcon from "@mui/icons-material/Google";
+import { UserContext } from "../contexts/GetUser";
 
 export default function LoginPage() {
+  const { checkAuth } = useContext(UserContext);
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
@@ -32,6 +34,8 @@ export default function LoginPage() {
 
       // Luôn lưu token vào localStorage
       localStorage.setItem("jwtToken", token);
+
+      await checkAuth();
 
       // Thông báo cho người dùng nếu chọn "Ghi nhớ đăng nhập"
       if (!rememberMe) {
