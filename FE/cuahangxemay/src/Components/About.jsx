@@ -3,144 +3,158 @@ import React from "react";
 
 export default function About() {
   return (
-    <div className="container-fluid">
-      <div className="container">
-        <h1 className="display-1 text-primary text-center">01</h1>
-        <h1 className="display-4 text-uppercase text-center mb-5">
-          Chào mừng <span className="text-primary">T-Motoshop</span>
+    <div className="w-full">
+      {/* Hero Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <h1 className="text-6xl text-center text-blue-600 font-bold">01</h1>
+        <h1 className="text-4xl uppercase text-center mb-10 font-bold">
+          Chào mừng <span className="text-blue-600">T-Motoshop</span>
         </h1>
-        <div className="row justify-content-center">
-          <div className="col-lg-10 text-center">
+
+        <div className="flex justify-center">
+          <div className="max-w-4xl text-center">
             <img
-              className="w-75 mb-4"
+              className="w-3/4 mx-auto mb-6"
               src="/assets/user/Image/Honda/xeSo/header_honda_CBR.jpg"
-              alt=""
+              alt="Honda CBR"
             />
-            <p>Nội dung giới thiệu cửa hàng...</p>
+            <p className="text-gray-700">Nội dung giới thiệu cửa hàng...</p>
           </div>
         </div>
-        <div className="row mt-3">
-          <div className="col-lg-4 mb-2">
-            <div
-              className="d-flex align-items-center bg-light p-4 mb-4"
-              style={{ height: 150 }}
-            >
-              <div
-                className="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary ml-n4 mr-4"
-                style={{ width: 100, height: 100 }}
-              >
-                <i className="fa fa-2x fa-headset text-secondary"></i>
-              </div>
-              <h4 className="text-uppercase m-0">{messages.ho_tro}</h4>
+
+        {/* Feature Boxes */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-8">
+          {/* Box 1 */}
+          <div className="flex items-center bg-gray-100 p-6 mb-4 h-40">
+            <div className="flex items-center justify-center flex-shrink-0 bg-blue-600 -ml-8 mr-6 w-24 h-24">
+              <i className="fa fa-2x fa-headset text-gray-200"></i>
             </div>
+            <h4 className="uppercase font-bold">{messages.ho_tro}</h4>
           </div>
 
-          <div className="col-lg-4 mb-2">
-            <div
-              className="d-flex align-items-center bg-secondary p-4 mb-4"
-              style={{ height: 150 }}
-            >
-              <div
-                className="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary ml-n4 mr-4"
-                style={{ width: 100, height: 100 }}
-              >
-                <i className="fa fa-2x fa-car text-secondary"></i>
-              </div>
-              <h4 className="text-light text-uppercase m-0">
-                {messages.xem_xe}
-              </h4>
+          {/* Box 2 */}
+          <div className="flex items-center bg-gray-800 p-6 mb-4 h-40">
+            <div className="flex items-center justify-center flex-shrink-0 bg-blue-600 -ml-8 mr-6 w-24 h-24">
+              <i className="fa fa-2x fa-car text-gray-200"></i>
             </div>
+            <h4 className="uppercase text-white font-bold">
+              {messages.xem_xe}
+            </h4>
           </div>
 
-          <div className="col-lg-4 mb-2">
-            <div
-              className="d-flex align-items-center bg-light p-4 mb-4"
-              style={{ height: 150 }}
-            >
-              <div
-                className="d-flex align-items-center justify-content-center flex-shrink-0 bg-primary ml-n4 mr-4"
-                style={{ width: 100, height: 100 }}
-              >
-                <i className="fa fa-2x fa-map-marker-alt text-secondary"></i>
-              </div>
-              <h4 className="text-uppercase m-0">{messages.chi_nhanh}</h4>
+          {/* Box 3 */}
+          <div className="flex items-center bg-gray-100 p-6 mb-4 h-40">
+            <div className="flex items-center justify-center flex-shrink-0 bg-blue-600 -ml-8 mr-6 w-24 h-24">
+              <i className="fa fa-2x fa-map-marker-alt text-gray-200"></i>
             </div>
+            <h4 className="uppercase font-bold">{messages.chi_nhanh}</h4>
           </div>
         </div>
       </div>
-      <div className="container py-5">
-        <div className="row mx-0">
-          <div className="col-lg-6 px-2">
-            <div className="px-9 bg-secondary d-flex align-items-center justify-content-between">
-              <img
-                className="img-fluid flex-shrink-10 ml-n5 w-50 h-60 mr-2"
-                // src={`${contextPath}/assets/user/Image/Honda/xeSo/Win_trang.png`}
-                alt=""
-              />
-              <div className="text-right">
-                <h3 className="text-uppercase text-light mb-3 mr-3">
-                  {messages["ban_co_muon"]}
-                </h3>
-                <p className="mb-4 mr-3">{messages["content_bancomuon"]}</p>
-                <a className="btn btn-primary py-2 px-4 mr-3" href="">
-                  {messages["tham_gia_ngay"]}
-                </a>
-              </div>
+
+      {/* Promotional Section */}
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          {/* Promo 1 */}
+          <div className="px-6 bg-gray-800 flex items-center justify-between">
+            <img
+              className="w-1/2 h-auto -ml-6 mr-4 flex-shrink-0"
+              src="/assets/user/Image/Honda/xeSo/Win_trang.png"
+              alt="Honda Win"
+            />
+            <div className="text-right py-8">
+              <h3 className="uppercase text-white mb-4 font-bold">
+                {messages["ban_co_muon"]}
+              </h3>
+              <p className="mb-6 text-gray-300">
+                {messages["content_bancomuon"]}
+              </p>
+              <a
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-sm"
+                href=""
+              >
+                {messages["tham_gia_ngay"]}
+              </a>
             </div>
           </div>
-          <div className="col-lg-6 px-2">
-            <div className="px-9 bg-dark d-flex align-items-center justify-content-between">
-              <div className="text-left">
-                <h3 className="text-uppercase text-light mb-3 ml-3">
-                  {messages["lai_thu"]}
-                </h3>
-                <p className="mb-4 ml-3">{messages["content_bancomuon"]}</p>
-                <a className="btn btn-primary py-2 px-4 ml-3" href="">
-                  {messages["tham_gia_ngay"]}
-                </a>
-              </div>
-              <img
-                className="img-fluid flex-shrink-0 mr-n5 w-50 h-60 ml-2"
-                // src={`${contextPath}/assets/user/Image/Honda/tayga/Sh160_special.png`}
-                alt=""
-              />
+
+          {/* Promo 2 */}
+          <div className="px-6 bg-gray-900 flex items-center justify-between">
+            <div className="text-left py-8">
+              <h3 className="uppercase text-white mb-4 font-bold">
+                {messages["lai_thu"]}
+              </h3>
+              <p className="mb-6 text-gray-300">
+                {messages["content_bancomuon"]}
+              </p>
+              <a
+                className="bg-blue-600 hover:bg-blue-700 text-white py-2 px-6 rounded-sm"
+                href=""
+              >
+                {messages["tham_gia_ngay"]}
+              </a>
             </div>
+            <img
+              className="w-1/2 h-auto -mr-6 ml-4 flex-shrink-0"
+              src="/assets/user/Image/Honda/tayga/Sh160_special.png"
+              alt="Honda SH160"
+            />
           </div>
         </div>
       </div>
-      <div className="container-fluid py-5">
-        <div className="container py-5">
-          <div className="owl-carousel vendor-carousel">
-            <div className="bg-light p-4">
+
+      {/* Partners/Vendors Carousel */}
+      <div className="w-full py-12 bg-gray-50">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-7 gap-4">
+            <div className="bg-white p-4 flex items-center justify-center">
               <img
                 src="/assets/user/Image/Honda/logo-vinfast.png"
                 alt="Vinfast"
+                className="max-h-20"
               />
             </div>
-            <div className="bg-light p-4">
-              <img src="/assets/user/Image/Honda/suzuki.png" alt="Suzuki" />
+            <div className="bg-white p-4 flex items-center justify-center">
+              <img
+                src="/assets/user/Image/Honda/suzuki.png"
+                alt="Suzuki"
+                className="max-h-20"
+              />
             </div>
-            <div className="bg-light p-4">
+            <div className="bg-white p-4 flex items-center justify-center">
               <img
                 src="/assets/user/Image/Honda/logo_ducati.png"
                 alt="Ducati"
+                className="max-h-20"
               />
             </div>
-            <div className="bg-light p-4">
-              <img src="/assets/user/Image/Honda/yamaha.png" alt="Yamaha" />
-            </div>
-            <div className="bg-light p-4">
-              <img src="/assets/user/Image/Honda/piago.png" alt="Piaggio" />
-            </div>
-            <div className="bg-light p-4">
+            <div className="bg-white p-4 flex items-center justify-center">
               <img
-                style={{ width: "114px", height: "114px" }}
+                src="/assets/user/Image/Honda/yamaha.png"
+                alt="Yamaha"
+                className="max-h-20"
+              />
+            </div>
+            <div className="bg-white p-4 flex items-center justify-center">
+              <img
+                src="/assets/user/Image/Honda/piago.png"
+                alt="Piaggio"
+                className="max-h-20"
+              />
+            </div>
+            <div className="bg-white p-4 flex items-center justify-center">
+              <img
+                className="w-28 h-28"
                 src="/assets/user/Image/Honda/logohonda2.png"
                 alt="Honda"
               />
             </div>
-            <div className="bg-light p-4">
-              <img src="/assets/user/img/vendor-7.png" alt="Vendor 7" />
+            <div className="bg-white p-4 flex items-center justify-center">
+              <img
+                src="/assets/user/img/vendor-7.png"
+                alt="Vendor 7"
+                className="max-h-20"
+              />
             </div>
           </div>
         </div>

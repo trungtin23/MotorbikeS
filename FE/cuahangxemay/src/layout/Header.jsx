@@ -1,6 +1,6 @@
 import React, { useContext, useState } from "react";
 import { Search, User, MapPin, Phone } from "lucide-react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../Components/contexts/GetUser.jsx";
 // Import context để lấy thông tin người dùng
 
@@ -10,6 +10,8 @@ const Header = () => {
   console.log(isLoggedIn);
   const [showMenu, setShowMenu] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  const currentPath = location.pathname;
 
   const handleLogout = () => {
     localStorage.removeItem("jwtToken");
@@ -18,6 +20,35 @@ const Header = () => {
     setShowMenu(false);
     navigate("/login");
   };
+
+  // Hàm kiểm tra đường dẫn hiện tại để áp dụng style active
+  const isActive = (path) => {
+    if (path === "/") return currentPath === "/";
+    return currentPath.startsWith(path);
+  };
+
+  // Các định tuyến chính và đường dẫn tương ứng
+  const mainNavItems = [
+    { name: "Giới thiệu", path: "/about" },
+    { name: "Ô tô", path: "/cars" },
+    { name: "Xe máy", path: "/motorbikes" },
+    { name: "Dịch vụ sau bán hàng", path: "/after-sales" },
+    { name: "Đóng góp xã hội", path: "/social" },
+    { name: "Motorsports", path: "/motorsports" },
+  ];
+
+  // Các định tuyến phụ (sub-header) và đường dẫn tương ứng
+  const subNavItems = [
+    { name: "Trang chủ", path: "/" },
+    { name: "Sản phẩm", path: "/" },
+    { name: "Bảng giá", path: "/prices" },
+    { name: "Khuyến mãi", path: "/promotions" },
+    { name: "Tư vấn mua xe", path: "/consultation" },
+    { name: "Đăng ký lái thử", path: "/test-drive" },
+    { name: "Tin tức", path: "/news" },
+    { name: "Phụ tùng & phụ kiện", path: "/accessories" },
+    { name: "An toàn giao thông", path: "/safety" },
+  ];
 
   return (
     <div className="w-full">
@@ -75,42 +106,23 @@ const Header = () => {
 
             {/* Main Navigation */}
             <nav className="hidden md:flex space-x-8">
-              <a
-                href="#"
-                className="text-gray-700 hover:text-red-600 font-medium border-b-2 border-transparent hover:border-red-600 py-5"
-              >
-                Giới thiệu
-              </a>
-              <a
-                href="#"
-                className="text-gray-700 hover:text-red-600 font-medium border-b-2 border-transparent hover:border-red-600 py-5"
-              >
-                Ô tô
-              </a>
-              <a
-                href="#"
-                className="text-red-600 font-medium border-b-2 border-red-600 py-5"
-              >
-                Xe máy
-              </a>
-              <a
-                href="#"
-                className="text-gray-700 hover:text-red-600 font-medium border-b-2 border-transparent hover:border-red-600 py-5"
-              >
-                Dịch vụ sau bán hàng
-              </a>
-              <a
-                href="#"
-                className="text-gray-700 hover:text-red-600 font-medium border-b-2 border-transparent hover:border-red-600 py-5"
-              >
-                Đóng góp xã hội
-              </a>
-              <a
-                href="#"
-                className="text-gray-700 hover:text-red-600 font-medium border-b-2 border-transparent hover:border-red-600 py-5"
-              >
-                Motorsports
-              </a>
+              {mainNavItems.map((item) => (
+                <a
+                  key={item.path}
+                  href={item.path}
+                  onClick={(e) => {
+                    e.preventDefault();
+                    navigate(item.path);
+                  }}
+                  className={`font-medium border-b-2 py-5 ${
+                    isActive(item.path)
+                      ? "text-red-600 border-red-600"
+                      : "text-gray-700 hover:text-red-600 border-transparent hover:border-red-600"
+                  }`}
+                >
+                  {item.name}
+                </a>
+              ))}
             </nav>
 
             <div className="flex items-center space-x-4">
@@ -162,60 +174,23 @@ const Header = () => {
       <div className="bg-gray-50 border-b border-gray-200">
         <div className="container mx-auto px-4">
           <div className="flex overflow-x-auto py-3 space-x-6 no-scrollbar">
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Trang chủ
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Sản phẩm
-            </a>
-            <a
-              href="#"
-              className="text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Bảng giá
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Khuyến mãi
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Tư vấn mua xe
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Đăng ký lái thử
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Tin tức
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              Phụ tùng & phụ kiện
-            </a>
-            <a
-              href="#"
-              className="text-gray-700 hover:text-red-600 whitespace-nowrap text-sm font-medium"
-            >
-              An toàn giao thông
-            </a>
+            {subNavItems.map((item) => (
+              <a
+                key={item.path}
+                href={item.path}
+                onClick={(e) => {
+                  e.preventDefault();
+                  navigate(item.path);
+                }}
+                className={`whitespace-nowrap text-sm font-medium ${
+                  isActive(item.path)
+                    ? "text-red-600"
+                    : "text-gray-700 hover:text-red-600"
+                }`}
+              >
+                {item.name}
+              </a>
+            ))}
           </div>
         </div>
       </div>

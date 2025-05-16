@@ -10,6 +10,7 @@ import HomePage from "./Components/HomePage.jsx";
 import LoginPage from "./Components/Account/Login.jsx";
 import RegisterPage from "./Components/Account/Resigter.jsx";
 import CustomerProfile from "./Components/Account/Profile.jsx";
+import ScrollRestoration from "./Components/ScrollRestoration.jsx";
 
 const App = () => {
   return (
@@ -20,9 +21,17 @@ const App = () => {
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />
         <Route path="profile" element={<CustomerProfile />} />
-        <Route path="product" element={<Products />} />
         <Route path="service" element={<Services />} />
         <Route path="contact" element={<Contacts />} />
+        <Route
+          path="product"
+          element={
+            <>
+              <ScrollRestoration />
+              <Products />
+            </>
+          }
+        />
       </Route>
     </Routes>
   );
