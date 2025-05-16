@@ -156,14 +156,13 @@ export default function ScooterListingPage() {
                   key={product.id}
                   className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                 >
+
+                  {/*Product*/}
                   <div className="p-4 text-center">
                     <h3 className="text-xl font-bold mb-4">{product.name}</h3>
                     <img
                       src={
-                        // product.avatar
-                        //   ? `http://localhost:8080/api/files/${product.avatar}`
-                        //   :
-                        "/api/placeholder/300/200"
+                        `/assets/user/Image/Honda/tayga/${product.avatar}`
                       }
                       alt={product.name}
                       className="w-full h-48 object-contain mb-4"

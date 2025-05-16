@@ -22,6 +22,15 @@ public class ProductDTO {
     private String engieType;
     private String brandName; // Chỉ lấy tên của Brand
     private String motolineName; // Chỉ lấy tên của Motoline
+    private BrandDTO brand;
+
+    public BrandDTO getBrand() {
+        return brand;
+    }
+
+    public void setBrand(BrandDTO brand) {
+        this.brand = brand;
+    }
 
     // Getters và Setters
     public Integer getId() {

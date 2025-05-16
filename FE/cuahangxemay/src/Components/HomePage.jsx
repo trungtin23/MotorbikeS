@@ -39,10 +39,10 @@ export default function HondaHomepage() {
   ];
 
   const productCategories = [
-    { id: 1, name: "Ô tô", image: "/api/placeholder/300/180" },
-    { id: 2, name: "Xe máy", image: "/api/placeholder/300/180" },
-    { id: 3, name: "Xe phân khối lớn", image: "/api/placeholder/300/180" },
-    { id: 4, name: "Sản phẩm cơ khí", image: "/api/placeholder/300/180" },
+    { id: 1, name: "Ô tô", image: "/assets/user/Image/Honda/tayga/AB_125_den.png" },
+    { id: 2, name: "Xe máy", image: "/assets/user/Image/Honda/tayga/AB_125_den.png" },
+    { id: 3, name: "Xe phân khối lớn", image: "/assets/user/Image/Honda/tayga/AB_125_den.png" },
+    { id: 4, name: "Sản phẩm cơ khí", image: "/assets/user/Image/Honda/tayga/AB_125_den.png" },
   ];
 
   const popularModels = [
@@ -50,25 +50,25 @@ export default function HondaHomepage() {
       id: 1,
       name: "Honda CR-V",
       price: "Từ 1.109.000.000 VNĐ",
-      image: "/api/placeholder/280/200",
+      image: "/assets/user/Image/Honda/tayga/AB_125_den.png",
     },
     {
       id: 2,
       name: "Honda City",
       price: "Từ 559.000.000 VNĐ",
-      image: "/api/placeholder/280/200",
+      image: "/assets/user/Image/Honda/tayga/AB_125_den.png",
     },
     {
       id: 3,
       name: "Honda Civic",
       price: "Từ 730.000.000 VNĐ",
-      image: "/api/placeholder/280/200",
+      image: "/assets/user/Image/Honda/tayga/AB_125_den.png",
     },
     {
       id: 4,
       name: "Honda HR-V",
       price: "Từ 699.000.000 VNĐ",
-      image: "/api/placeholder/280/200",
+      image: "/assets/user/Image/Honda/tayga/AB_125_den.png",
     },
   ];
 

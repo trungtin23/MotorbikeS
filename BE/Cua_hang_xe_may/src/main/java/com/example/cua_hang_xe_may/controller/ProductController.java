@@ -21,23 +21,24 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Product> getById(@PathVariable Integer id) {
-        Product product = productService.findById(id);
-        return product != null ? ResponseEntity.ok(product) : ResponseEntity.notFound().build();
+    public ResponseEntity<ProductDTO> getById(@PathVariable Integer id) {
+        System.out.println(">>> Đang tìm sản phẩm ID = " + id);
+        ProductDTO productDTO = productService.findById(id);
+        return productDTO != null ? ResponseEntity.ok(productDTO) : ResponseEntity.notFound().build();
     }
 
     @PostMapping
-    public Product create(@RequestBody Product product) {
-        return productService.save(product);
+    public ProductDTO create(@RequestBody ProductDTO productDTO) {
+        return productService.save(productDTO);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Product> update(@PathVariable Integer id, @RequestBody Product product) {
+    public ResponseEntity<ProductDTO> update(@PathVariable Integer id, @RequestBody ProductDTO productDTO) {
         if (productService.findById(id) == null) {
             return ResponseEntity.notFound().build();
         }
-        product.setId(id);
-        return ResponseEntity.ok(productService.save(product));
+        productDTO.setId(id);
+        return ResponseEntity.ok(productService.save(productDTO));
     }
 
     @DeleteMapping("/{id}")
