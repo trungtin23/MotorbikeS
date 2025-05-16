@@ -3,11 +3,11 @@ package com.example.cua_hang_xe_may.Helpers;
 import org.springframework.core.io.UrlResource;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 import org.springframework.core.io.Resource;
+import org.springframework.web.multipart.MultipartFile;
+
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
@@ -34,4 +34,26 @@ public class UploadFileHelper {
             return ResponseEntity.internalServerError().build();
         }
     }
+    @PostMapping("/upload")
+    public ResponseEntity<String> uploadFile(@RequestParam("file") MultipartFile file) {
+        try {
+            Path uploadPath = Paths.get("uploads/product-images");
+
+            // Tạo thư mục nếu chưa có
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Lưu file vào thư mục
+            String filename = file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(filename);
+            file.transferTo(filePath.toFile());
+
+            return ResponseEntity.ok("Upload thành công: " + filename);
+        } catch (Exception e) {
+            e.printStackTrace();
+            return ResponseEntity.internalServerError().body("Upload thất bại");
+        }
+    }
+
 }
