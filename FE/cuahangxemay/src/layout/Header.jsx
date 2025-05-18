@@ -30,8 +30,7 @@ const Header = () => {
   // Các định tuyến chính và đường dẫn tương ứng
   const mainNavItems = [
     { name: "Giới thiệu", path: "/about" },
-    { name: "Ô tô", path: "/cars" },
-    { name: "Xe máy", path: "/motorbikes" },
+    { name: "Xe máy", path: "/product" },
     { name: "Dịch vụ sau bán hàng", path: "/after-sales" },
     { name: "Đóng góp xã hội", path: "/social" },
     { name: "Motorsports", path: "/motorsports" },
@@ -140,25 +139,32 @@ const Header = () => {
                       />
                     </button>
                     {showMenu && (
-                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                        <a
-                          href="/profile"
-                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        >
-                          Xem Hồ Sơ
-                        </a>
-                        <button
-                          onClick={handleLogout}
-                          className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                        >
-                          Đăng Xuất
-                        </button>
-                      </div>
+                        <div
+                            className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                          <a
+                              href="/profile"
+                              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            Xem Hồ Sơ
+                          </a>
+                          <a
+                              href="/cart"
+                              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            Giỏ hàng của bạn
+                          </a>
+                          <button
+                              onClick={handleLogout}
+                              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                          >
+                            Đăng Xuất
+                          </button>
+                        </div>
                     )}
                   </div>
                 ) : (
-                  <a
-                    className="text-black-600 border border-black px-10 py-3 square-full duration-300 hover:bg-orange-500 hover:text-white"
+                    <a
+                        className="text-black-600 border border-black px-10 py-3 square-full duration-300 hover:bg-orange-500 hover:text-white"
                     href="/login"
                   >
                     Đăng Nhập
