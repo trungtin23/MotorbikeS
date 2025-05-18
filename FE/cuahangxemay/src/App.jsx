@@ -11,6 +11,8 @@ import LoginPage from "./Components/Account/Login.jsx";
 import RegisterPage from "./Components/Account/Resigter.jsx";
 import CustomerProfile from "./Components/Account/Profile.jsx";
 import ScrollRestoration from "./Components/ScrollRestoration.jsx";
+import Cart from "./Components/Cart.jsx";
+import ProductDetail from "./Components/ProductDetails.jsx";
 
 const App = () => {
   return (
@@ -32,6 +34,8 @@ const App = () => {
             </>
           }
         />
+          <Route path="productdetail" element={<ProductDetail/>} />
+          <Route path="cart" element={<Cart/>} />
       </Route>
     </Routes>
   );
