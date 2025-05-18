@@ -1,11 +1,10 @@
 package com.example.cua_hang_xe_may.entities;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+
+import java.util.List;
 
 @Getter
 @Setter
@@ -21,5 +20,12 @@ public class Productversion {
 
     @Column(name = "price", nullable = false)
     private Double price;
+
+    @ManyToOne
+    @JoinColumn(name = "productid", nullable = false)
+    private Product product;
+
+    @OneToMany(mappedBy = "versionID", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<Productcolor> colors;
 
 }

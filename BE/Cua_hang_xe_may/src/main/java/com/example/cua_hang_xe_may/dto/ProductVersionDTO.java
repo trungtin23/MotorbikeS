@@ -1,10 +1,21 @@
 package com.example.cua_hang_xe_may.dto;
 
+import java.util.List;
+
 public class ProductVersionDTO {
     private Integer id;
     private Integer productID;
     private String versionName;
     private Double price;
+    private List<ProductColorDTO> colors;
+
+    public List<ProductColorDTO> getColors() {
+        return colors;
+    }
+
+    public void setColors(List<ProductColorDTO> colors) {
+        this.colors = colors;
+    }
 
     public ProductVersionDTO(Integer id, Integer productID, String versionName, Double price) {
         this.id = id;

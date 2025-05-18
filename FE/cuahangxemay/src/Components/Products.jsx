@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, Filter, ArrowRight } from "lucide-react";
-
+import {Link} from "react-router-dom"
 import axios from "axios";
 import ScrollRestoration from "./ScrollRestoration.jsx";
 
@@ -152,8 +152,8 @@ export default function ScooterListingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
+                  <Link  key={product.id} to={`/productdetail/${product.id}`} className="block">
                 <div
-                  key={product.id}
                   className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
                 >
                   {/*Product*/}
@@ -184,6 +184,7 @@ export default function ScooterListingPage() {
                     </div>
                   </div>
                 </div>
+                  </Link>
               ))
             ) : (
               <div className="col-span-full text-center text-gray-600 py-8">

@@ -11,7 +11,8 @@ export default function ProductDetail() {
     useEffect(() => {
         async function fetchProductDetail() {
             try {
-                const res = await axios.get(`/api/products/${id}`);
+                const res = await axios.get(`http://localhost:8080/api/products/${id}`);
+                console.log("Dữ liệu API:", res.data);
                 setProduct(res.data.product);
                 setVersionColors(res.data.versionColors);
                 setSelectedColor(res.data.versionColors[0]?.colors[0]);
@@ -23,23 +24,23 @@ export default function ProductDetail() {
     }, [id]);
 
     if (!product || !selectedColor) return <div>Loading...</div>;
-
     return (
+
         <div className="container">
             <h1>Bảng giá màu sắc</h1>
             <div className="row">
                 <div className="col-lg-6">
                     <img
-                        src={`/assets/user/Image/${selectedColor.photo}`}
+                        src={`http://localhost:8080/api/files/${product.avatar}`}
                         alt="Product"
                         className="img-fluid w-100"
                     />
                     <div>
-                        <h2>{product.name}</h2>
-                        <h2>{selectedColor.versionName}</h2>
-                        <h2>{selectedColor.color}</h2>
-                        <div>Giá: {selectedColor.price.toLocaleString()} VNĐ</div>
-                        <div>{selectedColor.quantity} sản phẩm có sẵn</div>
+                        <h2>{product?.name}</h2>
+                        <h2>{selectedColor?.versionName}</h2>
+                        <h2>{selectedColor?.color}</h2>
+                        <div>Giá: {selectedColor?.price.toLocaleString()} VNĐ</div>
+                        <div>{selectedColor?.quantity} sản phẩm có sẵn</div>
                     </div>
                 </div>
 
