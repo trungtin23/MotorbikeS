@@ -1,5 +1,6 @@
 package com.example.cua_hang_xe_may.service;
 
+import com.example.cua_hang_xe_may.dto.ProductColorDTO;
 import com.example.cua_hang_xe_may.dto.ProductVersionDTO;
 import com.example.cua_hang_xe_may.entities.Productversion;
 import com.example.cua_hang_xe_may.repositories.ProductVersionRepository;
@@ -25,12 +26,17 @@ public class ProductVersionServiceImpl implements ProductVersionService {
     }
 
     @Override
-    public ProductVersionDTO findById(Integer id) {
-        return productVersionRepository.findById(id)
+    public List<ProductVersionDTO> findByProductId(Integer id) {
+        return productVersionRepository.findById(id).stream()
                 .map(this::mapToDTO)
-                .orElse(null);
+                .collect(Collectors.toList());
     }
     private ProductVersionDTO mapToDTO(Productversion entity) {
-        return modelMapper.map(entity, ProductVersionDTO.class);
+        ProductVersionDTO dto = modelMapper.map(entity, ProductVersionDTO.class);
+        List<ProductColorDTO> colors = entity.getColors().stream()
+                .map(color -> modelMapper.map(color, ProductColorDTO.class))
+                .collect(Collectors.toList());
+        dto.setColors(colors);
+        return dto;
     }
 }
