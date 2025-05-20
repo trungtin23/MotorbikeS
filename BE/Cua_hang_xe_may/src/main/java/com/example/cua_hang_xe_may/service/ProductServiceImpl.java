@@ -1,8 +1,12 @@
 package com.example.cua_hang_xe_may.service;
 
+import com.example.cua_hang_xe_may.dto.ProductColorDTO;
 import com.example.cua_hang_xe_may.dto.ProductDTO;
+import com.example.cua_hang_xe_may.dto.ProductVersionDTO;
 import com.example.cua_hang_xe_may.entities.Product;
+import com.example.cua_hang_xe_may.entities.Productversion;
 import com.example.cua_hang_xe_may.repositories.ProductRepository;
+import com.example.cua_hang_xe_may.repositories.ProductVersionRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -16,6 +20,8 @@ public class ProductServiceImpl implements ProductService {
     private ProductRepository productRepository;
     @Autowired
     private ModelMapper modelMapper;
+    @Autowired
+    private ProductVersionRepository productVersionRepository;
 
 //    public List<ProductDTO> findAll() {
 //
@@ -56,15 +62,46 @@ public class ProductServiceImpl implements ProductService {
 
     @Override
     public ProductDTO findById(Integer id) {
-        return productRepository.findById(id)
+//        return productRepository.findById(id)
+//                .map(this::mapToDTO)
+//                .orElse(null);
+        ProductDTO productDTO = productRepository.findById(id)
                 .map(this::mapToDTO)
                 .orElse(null);
+        if(productDTO != null) {
+            List<Productversion> versions = productVersionRepository.findAllByProductId(id);
+            List<ProductVersionDTO> versionDTOS = versions.stream().map(v -> {
+                ProductVersionDTO productVersionDTO = new ProductVersionDTO();
+                productVersionDTO.setId(v.getId());
+                productVersionDTO.setVersionName(v.getVersionname());
+                productVersionDTO.setPrice(v.getPrice());
+                productVersionDTO.setProductID(v.getProduct().getId());
+
+                productVersionDTO.setColors(
+                        v.getColors().stream().map(c -> {
+                            ProductColorDTO productColorDTO = new ProductColorDTO();
+                            productColorDTO.setId(c.getId());
+                            productColorDTO.setVersionID(v.getId());
+                            productColorDTO.setColor(c.getColor());
+                            productColorDTO.setPrice(c.getPrice());
+                            productColorDTO.setPhoto(c.getPhoto());
+                            productColorDTO.setQuantity(c.getQuantity());
+                            productColorDTO.setValue(c.getValue());
+                            return productColorDTO;
+                        }).collect(Collectors.toList())
+                );
+                return productVersionDTO;
+            }).collect(Collectors.toList());
+            productDTO.setVersionColors(versionDTOS);
+        }
+        return productDTO;
     }
 
     @Override
     public void deleteById(Integer id) {
         productRepository.deleteById(id);
     }
+
     private ProductDTO mapToDTO(Product product) {
         ProductDTO dto = modelMapper.map(product, ProductDTO.class);
         if (product.getBrand() != null) {
@@ -75,6 +112,7 @@ public class ProductServiceImpl implements ProductService {
         }
         return dto;
     }
+
     @Override
     public ProductDTO save(ProductDTO dto) {
         Product product = mapToEntity(dto);

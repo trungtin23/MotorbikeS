@@ -36,33 +36,7 @@ public class ProductController {
         if (productDTO == null) {
             return ResponseEntity.notFound().build();
         }
-
-        List<ProductVersionDTO> versions = productVersionService.findByProductId(id);
-
-        List<Map<String, Object>> versionColors = versions.stream().map(v -> {
-            Map<String, Object> versionMap = new HashMap<>();
-            versionMap.put("versionName", v.getVersionName());
-
-            List<Map<String, Object>> colors = v.getColors().stream().map(c -> {
-                Map<String, Object> colorMap = new HashMap<>();
-                colorMap.put("photo", c.getPhoto());
-                colorMap.put("color", c.getColor());
-                colorMap.put("price", c.getPrice());
-                colorMap.put("quantity", c.getQuantity());
-                colorMap.put("value", c.getValue());
-                colorMap.put("versionName", v.getVersionName());
-                return colorMap;
-            }).collect(Collectors.toList());
-
-            versionMap.put("colors", colors);
-            return versionMap;
-        }).collect(Collectors.toList());
-
-        Map<String, Object> response = new HashMap<>();
-        response.put("product", productDTO);
-        response.put("versionColors", versionColors);
-
-        return ResponseEntity.ok(response);
+        return ResponseEntity.ok(Map.of("product", productDTO));
     }
 
     @PostMapping
