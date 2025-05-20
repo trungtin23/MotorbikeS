@@ -1,5 +1,7 @@
 package com.example.cua_hang_xe_may.dto;
 
+import java.util.List;
+
 public class ProductDTO {
     private Integer id;
     private String avatar;
@@ -23,6 +25,15 @@ public class ProductDTO {
     private String brandName; // Chỉ lấy tên của Brand
     private String motolineName; // Chỉ lấy tên của Motoline
     private BrandDTO brand;
+    private List<ProductVersionDTO> versionColors;
+
+    public List<ProductVersionDTO> getVersionColors() {
+        return versionColors;
+    }
+
+    public void setVersionColors(List<ProductVersionDTO> versionColors) {
+        this.versionColors = versionColors;
+    }
 
     public BrandDTO getBrand() {
         return brand;

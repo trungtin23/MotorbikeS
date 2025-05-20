@@ -30,13 +30,16 @@ export default function ProductDetail() {
         const res = await axios.get(`http://localhost:8080/api/products/${id}`);
         console.log("Dữ liệu API:", res.data);
         setProduct(res.data.product);
-        setVersionColors(res.data.versionColors);
+        setVersionColors(res.data.product.versionColors);
 
         // Thiết lập phiên bản và màu mặc định
-        if (res.data.versionColors.length > 0) {
-          setSelectedVersion(res.data.versionColors[0]);
-          setSelectedColor(res.data.versionColors[0]?.colors[0]);
-        }
+          if (res.data.product.versionColors.length > 0) {
+              const firstVersion = res.data.product.versionColors[0];
+              setSelectedVersion(firstVersion);
+
+              const firstColor = firstVersion.colors?.find(c => c.quantity > 0) || firstVersion.colors[0] || null;
+              setSelectedColor(firstColor);
+          }
 
         setLoading(false);
       } catch (err) {
@@ -71,7 +74,6 @@ export default function ProductDetail() {
       version: selectedVersion?.versionName,
       color: selectedColor?.color,
     });
-    // TODO: Mở form đặt lịch hoặc chuyển hướng đến trang đặt lịch
   };
 
   // Hiển thị trạng thái đang tải
