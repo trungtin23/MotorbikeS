@@ -10,6 +10,7 @@ import HomePage from "./Components/HomePage.jsx";
 import LoginPage from "./Components/Account/Login.jsx";
 import RegisterPage from "./Components/Account/Resigter.jsx";
 import ForgotPasswordPage from "./Components/Account/ForgotPassword.jsx";
+import ResetPasswordPage from "./Components/Account/ResetPassword.jsx";
 import CustomerProfile from "./Components/Account/Profile.jsx";
 import ScrollRestoration from "./Components/ScrollRestoration.jsx";
 import Cart from "./Components/Cart.jsx";
@@ -22,7 +23,8 @@ const App = () => {
       <Route path="login" element={<LoginPage />} />
       <Route path="resigter" element={<RegisterPage />} />
       <Route path="verify-email" element={<VerifyEmail />} />
-      <Route path="forgotpass" element={<ForgotPasswordPage />} />
+      <Route path="forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="reset-password" element={<ResetPasswordPage />} />
       <Route element={<Header />}>
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />

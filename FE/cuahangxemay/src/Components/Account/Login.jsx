@@ -11,14 +11,20 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [isPendingVerification, setIsPendingVerification] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
+    setIsPendingVerification(false);
+    setResendSuccess(false);
     setLoading(true);
 
     try {
@@ -59,13 +65,51 @@ export default function LoginPage() {
       }
     } catch (err) {
       console.error("Lỗi đăng nhập:", err);
-      setError(
-        err.response?.data?.message ||
-          err.message ||
-          "Đăng nhập thất bại. Vui lòng thử lại."
-      );
+      const errorMessage = err.response?.data?.message || err.message || "Đăng nhập thất bại. Vui lòng thử lại.";
+      setError(errorMessage);
+
+      // Check if the error is about pending verification
+      if (errorMessage.includes("chưa được kích hoạt") || errorMessage.includes("xác thực")) {
+        setIsPendingVerification(true);
+        // Try to get the email from the username if it looks like an email
+        if (username.includes('@')) {
+          setEmail(username);
+        }
+      }
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email || !email.includes('@')) {
+      setError("Vui lòng nhập địa chỉ email hợp lệ");
+      return;
+    }
+
+    setResendLoading(true);
+    setResendSuccess(false);
+    setError("");
+
+    try {
+      const response = await axios.post(
+        "http://localhost:8080/api/auth/resend-verification",
+        { email }
+      );
+
+      if (response.data.success) {
+        setResendSuccess(true);
+      } else {
+        setError(response.data.message || "Không thể gửi email xác thực. Vui lòng thử lại.");
+      }
+    } catch (err) {
+      setError(
+        err.response?.data?.message ||
+        err.message ||
+        "Đã xảy ra lỗi khi gửi yêu cầu. Vui lòng thử lại."
+      );
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -89,114 +133,171 @@ export default function LoginPage() {
       <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
         <div className="bg-white py-8 px-6 shadow rounded-lg sm:px-10 border border-gray-200">
           {/* Hiển thị thông báo lỗi nếu có */}
-          {error && (
+          {error && !isPendingVerification && (
             <div className="mb-4 text-center text-sm text-red-600 bg-red-100 p-2 rounded">
               {error}
             </div>
           )}
 
-          <form className="mb-0 space-y-6" onSubmit={handleSubmit}>
-            <div>
-              <label
-                htmlFor="username"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Tài khoản
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <User className="h-5 w-5 text-gray-400" />
-                </div>
-                <input
-                  id="username"
-                  name="username"
-                  type="text"
-                  autoComplete="username"
-                  required
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500"
-                  placeholder="Nhập tài khoản của bạn"
-                />
-              </div>
-            </div>
+          {/* Hiển thị form gửi lại email xác thực nếu tài khoản chưa được kích hoạt */}
+          {isPendingVerification && (
+            <div className="mb-6 p-4 border border-yellow-300 rounded-md bg-yellow-50">
+              <h3 className="text-sm font-medium text-yellow-800 mb-2">
+                Tài khoản chưa được kích hoạt
+              </h3>
+              <p className="text-sm text-yellow-700 mb-4">
+                Vui lòng kiểm tra email của bạn để xác thực tài khoản. Nếu bạn chưa nhận được email xác thực, bạn có thể yêu cầu gửi lại.
+              </p>
 
-            <div>
-              <label
-                htmlFor="password"
-                className="block text-sm font-medium text-gray-700"
-              >
-                Mật khẩu
-              </label>
-              <div className="mt-1 relative rounded-md shadow-sm">
-                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                  <Lock className="h-5 w-5 text-gray-400" />
+              <div className="space-y-3">
+                <div>
+                  <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                    Email
+                  </label>
+                  <input
+                    type="email"
+                    id="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1 block w-full border border-gray-300 rounded-md shadow-sm py-2 px-3 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
+                    placeholder="Nhập email đăng ký của bạn"
+                  />
                 </div>
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
-                  required
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500"
-                  placeholder="••••••••"
-                />
-                <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+
+                <div className="flex items-center justify-between">
                   <button
                     type="button"
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    onClick={handleResendVerification}
+                    disabled={resendLoading}
+                    className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-5 w-5" />
-                    ) : (
-                      <Eye className="h-5 w-5" />
-                    )}
+                    {resendLoading ? "Đang gửi..." : "Gửi lại email xác thực"}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setIsPendingVerification(false)}
+                    className="inline-flex items-center px-4 py-2 border border-gray-300 text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                  >
+                    Quay lại đăng nhập
                   </button>
                 </div>
+
+                {resendSuccess && (
+                  <div className="mt-3 p-2 bg-green-50 border border-green-200 rounded-md">
+                    <p className="text-sm text-green-700">
+                      Email xác thực đã được gửi lại. Vui lòng kiểm tra hộp thư đến của bạn.
+                    </p>
+                  </div>
+                )}
               </div>
             </div>
+          )}
 
-            <div className="flex items-center justify-between">
-              <div className="flex items-center">
-                <input
-                  id="remember-me"
-                  name="remember-me"
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
-                />
+          {!isPendingVerification && (
+            <form className="mb-0 space-y-6" onSubmit={handleSubmit}>
+              <div>
                 <label
-                  htmlFor="remember-me"
-                  className="ml-2 block text-sm text-gray-700"
+                  htmlFor="username"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  Ghi nhớ đăng nhập
+                  Tài khoản
                 </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <User className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="username"
+                    name="username"
+                    type="text"
+                    autoComplete="username"
+                    required
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    className="block w-full pl-10 pr-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                    placeholder="Nhập tài khoản của bạn"
+                  />
+                </div>
               </div>
 
-              <div className="text-sm">
-                <a
-                  href="#"
-                  className="font-medium text-red-600 hover:text-red-500"
+              <div>
+                <label
+                  htmlFor="password"
+                  className="block text-sm font-medium text-gray-700"
                 >
-                  Quên mật khẩu?
-                </a>
+                  Mật khẩu
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    autoComplete="current-password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    className="block w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500"
+                    placeholder="••••••••"
+                  />
+                  <div className="absolute inset-y-0 right-0 pr-3 flex items-center">
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="text-gray-400 hover:text-gray-500 focus:outline-none"
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
+                </div>
               </div>
-            </div>
 
-            <div>
-              <button
-                type="submit"
-                disabled={loading}
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
-              >
-                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
-              </button>
-            </div>
-          </form>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center">
+                  <input
+                    id="remember-me"
+                    name="remember-me"
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={(e) => setRememberMe(e.target.checked)}
+                    className="h-4 w-4 text-red-600 focus:ring-red-500 border-gray-300 rounded"
+                  />
+                  <label
+                    htmlFor="remember-me"
+                    className="ml-2 block text-sm text-gray-700"
+                  >
+                    Ghi nhớ đăng nhập
+                  </label>
+                </div>
+
+                <div className="text-sm">
+                  <a
+                    href="/forgot-password"
+                    className="font-medium text-red-600 hover:text-red-500"
+                  >
+                    Quên mật khẩu?
+                  </a>
+                </div>
+              </div>
+
+              <div>
+                <button
+                  type="submit"
+                  disabled={loading}
+                  className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
+                >
+                  {loading ? "Đang đăng nhập..." : "Đăng nhập"}
+                </button>
+              </div>
+            </form>
+          )}
 
           <div className="mt-6">
             <div className="relative">
