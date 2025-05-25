@@ -20,7 +20,7 @@ public class Account {
     @Column(name = "password", length = 250)
     private String password;
 
-    @Column(name = "phone", length = 11)
+    @Column(name = "phone", length = 20)
     private String phone;
 
     @Column(name = "email", length = 50)
@@ -32,7 +32,7 @@ public class Account {
     @Column(name = "status", length = 50)
     private String status;
 
-    @Column(name = "securityCode", nullable = false, length = 10)
+    @Column(name = "securityCode", nullable = false, length = 250)
     private String securityCode;
 
     @Column(name = "name", length = 250)

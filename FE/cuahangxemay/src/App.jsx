@@ -9,16 +9,20 @@ import Products from "./Components/Products.jsx";
 import HomePage from "./Components/HomePage.jsx";
 import LoginPage from "./Components/Account/Login.jsx";
 import RegisterPage from "./Components/Account/Resigter.jsx";
+import ForgotPasswordPage from "./Components/Account/ForgotPassword.jsx";
 import CustomerProfile from "./Components/Account/Profile.jsx";
 import ScrollRestoration from "./Components/ScrollRestoration.jsx";
 import Cart from "./Components/Cart.jsx";
 import ProductDetail from "./Components/ProductDetails.jsx";
+import VerifyEmail from "./Components/Account/VerifyEmail.jsx";
 
 const App = () => {
   return (
     <Routes>
       <Route path="login" element={<LoginPage />} />
       <Route path="resigter" element={<RegisterPage />} />
+      <Route path="verify-email" element={<VerifyEmail />} />
+      <Route path="forgotpass" element={<ForgotPasswordPage />} />
       <Route element={<Header />}>
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />
@@ -34,8 +38,8 @@ const App = () => {
             </>
           }
         />
-          <Route path="productdetail/:id" element={<ProductDetail/>} />
-          <Route path="cart" element={<Cart/>} />
+        <Route path="productdetail/:id" element={<ProductDetail />} />
+        <Route path="cart" element={<Cart />} />
       </Route>
     </Routes>
   );

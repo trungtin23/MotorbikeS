@@ -39,7 +39,7 @@ const Header = () => {
   // Các định tuyến phụ (sub-header) và đường dẫn tương ứng
   const subNavItems = [
     { name: "Trang chủ", path: "/" },
-    { name: "Sản phẩm", path: "/" },
+    { name: "Sản phẩm", path: "/products" },
     { name: "Bảng giá", path: "/prices" },
     { name: "Khuyến mãi", path: "/promotions" },
     { name: "Tư vấn mua xe", path: "/consultation" },
@@ -139,32 +139,31 @@ const Header = () => {
                       />
                     </button>
                     {showMenu && (
-                        <div
-                            className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
-                          <a
-                              href="/profile"
-                              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                          >
-                            Xem Hồ Sơ
-                          </a>
-                          <a
-                              href="/cart"
-                              className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
-                          >
-                            Giỏ hàng của bạn
-                          </a>
-                          <button
-                              onClick={handleLogout}
-                              className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
-                          >
-                            Đăng Xuất
-                          </button>
-                        </div>
+                      <div className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                        <a
+                          href="/profile"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Xem Hồ Sơ
+                        </a>
+                        <a
+                          href="/cart"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Giỏ hàng của bạn
+                        </a>
+                        <button
+                          onClick={handleLogout}
+                          className="block w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Đăng Xuất
+                        </button>
+                      </div>
                     )}
                   </div>
                 ) : (
-                    <a
-                        className="text-black-600 border border-black px-10 py-3 square-full duration-300 hover:bg-orange-500 hover:text-white"
+                  <a
+                    className="text-black-600 border border-black px-10 py-3 square-full duration-300 hover:bg-orange-500 hover:text-white"
                     href="/login"
                   >
                     Đăng Nhập

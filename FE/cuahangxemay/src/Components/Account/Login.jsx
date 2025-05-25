@@ -11,13 +11,15 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [rememberMe, setRememberMe] = useState(false); // Giữ checkbox nhưng chỉ dùng để thông báo
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(""); // Reset thông báo lỗi
+    setError("");
+    setLoading(true);
 
     try {
       // Gửi yêu cầu đăng nhập tới backend
@@ -29,29 +31,41 @@ export default function LoginPage() {
         }
       );
 
-      // Lấy JWT từ phản hồi
-      const token = response.data;
+      console.log("Login response:", response.data); // Debug log
 
-      // Luôn lưu token vào localStorage
-      localStorage.setItem("jwtToken", token);
+      // ✅ SỬA: Lấy token từ response.data.data.token
+      if (
+        response.data.success &&
+        response.data.data &&
+        response.data.data.token
+      ) {
+        const token = response.data.data.token;
 
-      await checkAuth();
+        // Lưu token vào localStorage
+        localStorage.setItem("jwtToken", token);
 
-      // Thông báo cho người dùng nếu chọn "Ghi nhớ đăng nhập"
-      if (!rememberMe) {
-        console.log(
-          "Token đã được lưu trong localStorage, nhưng sẽ hết hạn khi đóng trình duyệt nếu không chọn 'Ghi nhớ đăng nhập'."
-        );
+        console.log("Token saved to localStorage:", token); // Debug log
+
+        // Cập nhật context
+        await checkAuth();
+
+        // Thông báo thành công
+        console.log("Đăng nhập thành công!");
+
+        // Điều hướng về trang chủ
+        navigate("/");
+      } else {
+        throw new Error("Invalid response format");
       }
-
-      // Điều hướng tới trang chính sau khi đăng nhập thành công
-      navigate("/");
     } catch (err) {
-      // Xử lý lỗi đăng nhập
-      setError(
-        err.response?.data?.message || "Đăng nhập thất bại. Vui lòng thử lại."
-      );
       console.error("Lỗi đăng nhập:", err);
+      setError(
+        err.response?.data?.message ||
+          err.message ||
+          "Đăng nhập thất bại. Vui lòng thử lại."
+      );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -63,7 +77,10 @@ export default function LoginPage() {
         </h2>
         <p className="mt-2 text-center text-sm text-gray-600">
           Hoặc{" "}
-          <a href="#" className="font-medium text-red-600 hover:text-red-500">
+          <a
+            href="resigter"
+            className="font-medium text-red-600 hover:text-red-500"
+          >
             đăng ký tài khoản mới
           </a>
         </p>
@@ -93,7 +110,7 @@ export default function LoginPage() {
                 <input
                   id="username"
                   name="username"
-                  type="text" // Đã sửa type thành "text"
+                  type="text"
                   autoComplete="username"
                   required
                   value={username}
@@ -173,9 +190,10 @@ export default function LoginPage() {
             <div>
               <button
                 type="submit"
-                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                disabled={loading}
+                className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-red-600 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 disabled:opacity-50"
               >
-                Đăng nhập
+                {loading ? "Đang đăng nhập..." : "Đăng nhập"}
               </button>
             </div>
           </form>
