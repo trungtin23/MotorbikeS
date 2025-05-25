@@ -14,70 +14,21 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Fake data - không cần gọi API
+  // Lay cart luu trong session
   useEffect(() => {
-    // Giả lập thời gian tải
-    const timer = setTimeout(() => {
-      setCartItems([
-        {
-          id: 1,
-          name: "Honda Wave Alpha",
-          brandName: "Honda",
-          version: "Tiêu chuẩn",
-          color: "Đỏ đen",
-          colorValue: "#D10000",
-          price: 18800000,
-          discount: 5,
-          quantity: 1,
-          avatar: "honda-wave-alpha.jpg",
-          inStock: 10,
-          category: "Xe số",
-          engineSize: "110cc",
-          fuelConsumption: "1.8L/100km",
-          description:
-            "Honda Wave Alpha phiên bản mới với thiết kế trẻ trung, năng động cùng với khả năng vận hành mạnh mẽ và tiết kiệm nhiên liệu vượt trội.",
-        },
-        {
-          id: 2,
-          name: "Yamaha Exciter",
-          brandName: "Yamaha",
-          version: "GP Edition",
-          color: "Xanh GP",
-          colorValue: "#0046AD",
-          price: 50900000,
-          discount: 0,
-          quantity: 1,
-          avatar: "yamaha-exciter-gp.jpg",
-          inStock: 5,
-          category: "Xe côn tay",
-          engineSize: "155cc",
-          fuelConsumption: "2.2L/100km",
-          description:
-            "Yamaha Exciter 155 VVA - mẫu xe côn tay thể thao số 1 tại Việt Nam với thiết kế góc cạnh đậm chất thể thao và khả năng vận hành mạnh mẽ.",
-        },
-        {
-          id: 3,
-          name: "Honda SH Mode",
-          brandName: "Honda",
-          version: "Cao cấp",
-          color: "Xanh lam đen",
-          colorValue: "#003A70",
-          price: 61990000,
-          discount: 3,
-          quantity: 1,
-          avatar: "honda-sh-mode.jpg",
-          inStock: 7,
-          category: "Xe tay ga",
-          engineSize: "125cc",
-          fuelConsumption: "2.0L/100km",
-          description:
-            "Honda SH Mode 125cc - dòng xe tay ga cao cấp dành cho nữ với thiết kế sang trọng, tinh tế và công nghệ hiện đại.",
-        },
-      ]);
-      setLoading(false);
-    }, 800); // Giả lập tải trong 800ms
-
-    return () => clearTimeout(timer);
+    fetch("/api/cart", {
+      credentials: "include",
+    })
+        .then((res) => res.json())
+        .then((data) => {
+          setCartItems(data);
+          setLoading(false);
+        })
+        .catch((error) => {
+          console.error("Error loading cart:", error);
+          setCartItems([]);
+          setLoading(false);
+        });
   }, []);
 
   const handleQuantityChange = (id, change) => {
