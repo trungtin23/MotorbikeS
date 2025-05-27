@@ -1,6 +1,9 @@
 package com.example.cua_hang_xe_may.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
+import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -14,6 +17,10 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+
+    @Value("${spring.mail.username}")
+    private String fromEmail;
+
     /**
      * Send an email with HTML content
      * 
@@ -23,6 +30,28 @@ public class EmailService {
      * @throws MessagingException if there's an error sending the email
      */
     public void sendHtmlEmail(String to, String subject, String content) throws MessagingException {
+
+        try {
+            System.out.println("Sending HTML email to: " + to);
+            System.out.println("Subject: " + subject);
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true); // true indicates HTML content
+
+            System.out.println("Email prepared, sending...");
+            mailSender.send(message);
+            System.out.println("Email sent successfully to " + to);
+        } catch (Exception e) {
+            System.err.println("Error sending HTML email: " + e.getMessage());
+            e.printStackTrace();
+            throw new MessagingException("Error sending HTML email", e);
+        }
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
@@ -31,6 +60,7 @@ public class EmailService {
         helper.setText(content, true); // true indicates HTML content
 
         mailSender.send(message);
+
     }
 
     /**
@@ -84,4 +114,40 @@ public class EmailService {
 
         sendHtmlEmail(to, subject, content);
     }
+
+
+    /**
+     * Send a test email to verify the email configuration
+     * 
+     * @param to recipient email address
+     * @throws MessagingException if there's an error sending the email
+     */
+    public void sendTestEmail(String to) throws MessagingException {
+        try {
+            System.out.println("Sending test email to: " + to);
+            String subject = "Test Email";
+            String content = "<div style='font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;'>"
+                    + "<h2 style='color: #333;'>Test Email</h2>"
+                    + "<p>This is a test email to verify the email configuration.</p>"
+                    + "<p>If you received this email, the email configuration is working correctly.</p>"
+                    + "</div>";
+
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(content, true); // true indicates HTML content
+
+            System.out.println("Test email prepared, sending...");
+            mailSender.send(message);
+            System.out.println("Test email sent successfully to " + to);
+        } catch (Exception e) {
+            System.err.println("Error sending test email: " + e.getMessage());
+            e.printStackTrace();
+            throw new MessagingException("Error sending test email", e);
+        }
+    }
+
 }

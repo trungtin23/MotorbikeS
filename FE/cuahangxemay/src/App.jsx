@@ -16,6 +16,9 @@ import ScrollRestoration from "./Components/ScrollRestoration.jsx";
 import Cart from "./Components/Cart.jsx";
 import ProductDetail from "./Components/ProductDetails.jsx";
 import VerifyEmail from "./Components/Account/VerifyEmail.jsx";
+import Payment from "./Components/Payment.jsx";
+import PaymentResult from "./Components/PaymentResult.jsx";
+import Orders from "./Components/Account/Orders.jsx";
 
 const App = () => {
   return (
@@ -42,6 +45,9 @@ const App = () => {
         />
         <Route path="productdetail/:id" element={<ProductDetail />} />
         <Route path="cart" element={<Cart />} />
+        <Route path="payment" element={<Payment />} />
+        <Route path="payment-result" element={<PaymentResult />} />
+        <Route path="account/orders" element={<Orders />} />
       </Route>
     </Routes>
   );
