@@ -17,12 +17,15 @@ public class WebConfig implements WebMvcConfigurer {
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
-<<<<<<< Updated upstream
+
 //    @Bean
 //    public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
 //        return config.getAuthenticationManager();
 //    }
 }
-=======
+
 }
->>>>>>> Stashed changes
+
+
+}
+

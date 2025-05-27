@@ -4,6 +4,9 @@ import jakarta.persistence.*;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
+import java.util.ArrayList;
+import java.util.List;
+
 @Entity
 @Table(name = "products")
 public class Product {
@@ -11,8 +14,6 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Integer id;
-
-
 
     @Column(name = "avatar", length = 200)
     private String avatar;
@@ -77,6 +78,9 @@ public class Product {
     @OnDelete(action = OnDeleteAction.CASCADE)
     @JoinColumn(name = "motolineId", nullable = false)
     private Motoline motoline;
+
+    @OneToMany(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Productversion> productVersions = new ArrayList<>();
 
     public Motoline getMotoline() {
         return motoline;

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link ,useSearchParams } from "react-router-dom";
 import {
   ShoppingCart,
   Heart,
@@ -12,9 +12,11 @@ import {
   Info,
   CircleDollarSign,
 } from "lucide-react";
-
 export default function ProductDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const versionParam = searchParams.get("version");
+  const colorParam = searchParams.get("color");
   const [product, setProduct] = useState(null);
   const [versionColors, setVersionColors] = useState([]);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -23,6 +25,8 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("specs");
 
+  //anh thay doi theo mau
+  const [selectedImage, setSelectedImage] = useState(null);
   useEffect(() => {
     async function fetchProductDetail() {
       try {
@@ -30,13 +34,41 @@ export default function ProductDetail() {
         const res = await axios.get(`http://localhost:8080/api/products/${id}`);
         console.log("Dữ liệu API:", res.data);
         setProduct(res.data.product);
-        setVersionColors(res.data.versionColors);
+        setVersionColors(res.data.product.versionColors);
 
         // Thiết lập phiên bản và màu mặc định
-        if (res.data.versionColors.length > 0) {
-          setSelectedVersion(res.data.versionColors[0]);
-          setSelectedColor(res.data.versionColors[0]?.colors[0]);
+        //   if (res.data.product.versionColors.length > 0) {
+        //       const firstVersion = res.data.product.versionColors[0];
+        //       setSelectedVersion(firstVersion);
+        //
+        //       const firstColor = firstVersion.colors?.find(c => c.quantity > 0) || firstVersion.colors[0] || null;
+        //       setSelectedColor(firstColor);
+        //   }
+        let selectedVer = null;
+        let selectedCol = null;
+
+        if (versionParam) {
+          selectedVer = res.data.product.versionColors.find(
+              (v) => v.versionName === versionParam
+          );
         }
+
+        if (!selectedVer) {
+          selectedVer = res.data.product.versionColors[0];
+        }
+
+        if (colorParam && selectedVer) {
+          selectedCol = selectedVer.colors.find(
+              (c) => c.color.toLowerCase() === colorParam.toLowerCase()
+          );
+        }
+
+        if (!selectedCol && selectedVer) {
+          selectedCol = selectedVer.colors?.find(c => c.quantity > 0) || selectedVer.colors[0];
+        }
+
+        setSelectedVersion(selectedVer);
+        setSelectedColor(selectedCol);
 
         setLoading(false);
       } catch (err) {
@@ -54,14 +86,37 @@ export default function ProductDetail() {
   };
 
   // Hàm xử lý thêm vào giỏ hàng
-  const handleAddToCart = () => {
-    // Thực hiện logic thêm vào giỏ hàng
-    console.log("Thêm vào giỏ hàng:", {
-      product,
-      version: selectedVersion?.versionName,
-      color: selectedColor?.color,
-      quantity,
-    });
+  const handleAddToCart = async () => {
+    if (!selectedColor || !selectedVersion || !product) return;
+
+    try {
+      const token = localStorage.getItem("jwtToken");
+
+      if (!token) {
+        alert("Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn");
+        return;
+      }
+
+      const payload = {
+        id: selectedColor.id,
+        color: selectedColor.color,
+        price: selectedColor.price,
+        quantity: quantity,
+        photo: selectedColor.photo,
+      };
+
+      const res = await axios.post("http://localhost:8080/api/cart/add", payload, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
+      alert("Sản phẩm đã được thêm vào giỏ hàng!");
+      console.log("Cart response:", res.data);
+    } catch (error) {
+      console.error("Lỗi thêm vào giỏ hàng:", error);
+      alert("Không thể thêm vào giỏ hàng");
+    }
   };
 
   // Hàm xử lý đặt lịch xem xe
@@ -71,7 +126,6 @@ export default function ProductDetail() {
       version: selectedVersion?.versionName,
       color: selectedColor?.color,
     });
-    // TODO: Mở form đặt lịch hoặc chuyển hướng đến trang đặt lịch
   };
 
   // Hiển thị trạng thái đang tải
@@ -131,7 +185,7 @@ export default function ProductDetail() {
         <div className="bg-gray-50 rounded-lg overflow-hidden p-4">
           <div className="relative pb-4">
             <img
-              src={`http://localhost:8080/api/files/${product.avatar}`}
+                src={`http://localhost:8080/api/files/${selectedImage || product.avatar}`}
               alt={product.name}
               className="w-full h-auto object-contain rounded-lg"
               style={{ maxHeight: "400px" }}
@@ -152,47 +206,6 @@ export default function ProductDetail() {
               )}
             </div>
           </div>
-
-          {/* Thêm hình ảnh chi tiết */}
-          <div className="grid grid-cols-5 gap-2 mt-4">
-            <div className="border-2 border-red-500 rounded-md overflow-hidden">
-              <img
-                src={`http://localhost:8080/api/files/${product.avatar}`}
-                alt={`${product.name} chính diện`}
-                className="w-full h-16 object-cover"
-              />
-            </div>
-            {/* Hình ảnh các góc nhìn khác */}
-            <div className="border border-gray-200 hover:border-red-500 rounded-md overflow-hidden cursor-pointer">
-              <img
-                src={`http://localhost:8080/api/files/${product.avatar}`}
-                alt={`${product.name} bên trái`}
-                className="w-full h-16 object-cover"
-              />
-            </div>
-            <div className="border border-gray-200 hover:border-red-500 rounded-md overflow-hidden cursor-pointer">
-              <img
-                src={`http://localhost:8080/api/files/${product.avatar}`}
-                alt={`${product.name} bên phải`}
-                className="w-full h-16 object-cover"
-              />
-            </div>
-            <div className="border border-gray-200 hover:border-red-500 rounded-md overflow-hidden cursor-pointer">
-              <img
-                src={`http://localhost:8080/api/files/${product.avatar}`}
-                alt={`${product.name} phía sau`}
-                className="w-full h-16 object-cover"
-              />
-            </div>
-            <div className="border border-gray-200 hover:border-red-500 rounded-md overflow-hidden cursor-pointer">
-              <img
-                src={`http://localhost:8080/api/files/${product.avatar}`}
-                alt={`${product.name} chi tiết`}
-                className="w-full h-16 object-cover"
-              />
-            </div>
-          </div>
-
           {/* Thêm thông tin công nghệ nổi bật */}
           <div className="mt-6 p-4 bg-gray-100 rounded-lg">
             <h3 className="text-sm font-medium text-gray-900 mb-2">
@@ -336,19 +349,27 @@ export default function ProductDetail() {
                       ? "opacity-100"
                       : "opacity-70"
                   }`}
-                  onClick={() => setSelectedColor(color)}
+                  onClick={() => {
+                    setSelectedColor(color);
+                    setSelectedImage(color.photo || product.avatar);
+                  }}
                 >
                   <div
-                    className={`w-14 h-14 rounded-full border-2 ${
-                      selectedColor?.color === color.color
-                        ? "border-red-600"
-                        : "border-gray-300"
-                    }`}
+                      className={`w-14 h-14 rounded-full border-2 ${
+                          selectedColor?.color === color.color
+                              ? "border-red-600"
+                              : "border-gray-300"
+                      }`}
                   >
-                    <div
-                      className="w-full h-full rounded-full m-0.5"
-                      style={{ backgroundColor: color.value || "#ccc" }}
-                    ></div>
+                    <img
+                        src={`http://localhost:8080/api/files/${color.photo || product.avatar}`}
+                        alt={color.color}
+                        className="w-full h-full rounded-full object-cover m-0.5 cursor-pointer"
+                        onClick={() => {
+                          setSelectedColor(color);
+                          setSelectedImage(color.photo || product.avatar);
+                        }}
+                    />
                   </div>
                   <span className="mt-1 text-xs text-gray-700">
                     {color.color}
@@ -1145,44 +1166,6 @@ export default function ProductDetail() {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Sản phẩm tương tự */}
-      <div className="mt-16">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">
-          Xe máy cùng phân khúc
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-          {[1, 2, 3, 4].map((_, index) => (
-            <div
-              key={index}
-              className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition"
-            >
-              <div className="aspect-w-16 aspect-h-9 bg-gray-200">
-                <img
-                  src={`http://localhost:8080/api/files/${product.avatar}`}
-                  alt="Related Product"
-                  className="w-full h-48 object-cover"
-                />
-              </div>
-              <div className="p-4">
-                <h3 className="text-sm font-medium text-gray-900">
-                  {product.brandName} {index % 2 === 0 ? "Wave" : "Vision"}{" "}
-                  {110 + index * 10}
-                </h3>
-                <p className="mt-1 text-xs text-gray-500">{product.category}</p>
-                <div className="mt-2 font-bold text-red-600">
-                  {(25000000 + index * 5000000).toLocaleString()} VNĐ
-                </div>
-                <div className="mt-3">
-                  <button className="w-full bg-gray-100 hover:bg-gray-200 text-gray-800 font-medium py-2 px-4 rounded text-sm">
-                    Xem chi tiết
-                  </button>
-                </div>
-              </div>
-            </div>
-          ))}
         </div>
       </div>
     </div>

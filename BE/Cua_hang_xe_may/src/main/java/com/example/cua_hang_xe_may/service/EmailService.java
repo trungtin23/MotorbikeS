@@ -1,7 +1,9 @@
 package com.example.cua_hang_xe_may.service;
 
 import org.springframework.beans.factory.annotation.Autowired;
+
 import org.springframework.beans.factory.annotation.Value;
+
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
@@ -15,6 +17,7 @@ public class EmailService {
     @Autowired
     private JavaMailSender mailSender;
 
+
     @Value("${spring.mail.username}")
     private String fromEmail;
 
@@ -27,6 +30,7 @@ public class EmailService {
      * @throws MessagingException if there's an error sending the email
      */
     public void sendHtmlEmail(String to, String subject, String content) throws MessagingException {
+
         try {
             System.out.println("Sending HTML email to: " + to);
             System.out.println("Subject: " + subject);
@@ -47,6 +51,16 @@ public class EmailService {
             e.printStackTrace();
             throw new MessagingException("Error sending HTML email", e);
         }
+
+        MimeMessage message = mailSender.createMimeMessage();
+        MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+        helper.setTo(to);
+        helper.setSubject(subject);
+        helper.setText(content, true); // true indicates HTML content
+
+        mailSender.send(message);
+
     }
 
     /**
@@ -101,6 +115,7 @@ public class EmailService {
         sendHtmlEmail(to, subject, content);
     }
 
+
     /**
      * Send a test email to verify the email configuration
      * 
@@ -134,4 +149,5 @@ public class EmailService {
             throw new MessagingException("Error sending test email", e);
         }
     }
+
 }

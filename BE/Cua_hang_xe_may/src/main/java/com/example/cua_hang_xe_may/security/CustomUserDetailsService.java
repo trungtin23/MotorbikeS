@@ -25,6 +25,12 @@ public class CustomUserDetailsService implements UserDetailsService {
         }
 
         Account accountData = account.get();
+
+        // Check if account is active
+        if (!"ACTIVE".equals(accountData.getStatus())) {
+            throw new UsernameNotFoundException("Account is not active. Please verify your email.");
+        }
+
         String role = mapRole(accountData.getRole());
 
         org.springframework.security.core.userdetails.User.UserBuilder builder =

@@ -1,41 +1,3 @@
-<<<<<<< Updated upstream
-
-import React from "react";
-export default function Cart(){
-    return (
-        <div className="container">
-            <h2><i className="fas fa-cart-shopping mr-3"></i>{t("theo_doi_quan_tam")}</h2>
-            <p>{t("them_san_pham_vao_gio_hang")}</p>
-            {cartItems.map((item, i) => (
-                <div className="row rent-item m-2" key={i}>
-                    <div className="col-lg-4">
-                        <img
-                            src={`/assets/user/Image/${item.productcolor.photo}`}
-                            alt=""
-                            className="img-fluid w-50"
-                        />
-                        <h4 className="text-uppercase">
-                            {item.productName} {item.versionName} - Màu {item.productcolor.color}
-                        </h4>
-                    </div>
-                    <div className="col-lg-3">
-                        <p>{t("so_luong")}: {item.quantity}</p>
-                        <p>{t("don_gia")}: {item.productcolor.price.toLocaleString()} VNĐ</p>
-                    </div>
-                    <div className="col-lg-3">
-                        <p>{t("tong_cong")}: {(item.productcolor.price * item.quantity).toLocaleString()} VNĐ</p>
-                        <button onClick={() => handleOpenPreview(i)} className="btn btn-primary">
-                            Xem Ngay
-                        </button>
-                    </div>
-                    <div className="col-lg-2">
-                        <button className="btn btn-danger">{t("xoa")}</button>
-                        <input
-                            type="checkbox"
-                            onChange={() => handleTick(i)}
-                            style={{transform: "scale(1.5)"}}
-                        />
-=======
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import {
@@ -53,7 +15,7 @@ export default function Cart() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
 
-  // Lay cart luu trong db
+  // Lấy cart lưu trong db
   useEffect(() => {
     const token = localStorage.getItem("jwtToken");
 
@@ -91,7 +53,8 @@ export default function Cart() {
       })
     );
   };
-  //Xoa sp khoi cart
+
+  // Xóa sản phẩm khỏi cart
   const handleRemoveItem = async (id) => {
     const token = localStorage.getItem("jwtToken");
     try {
@@ -113,6 +76,7 @@ export default function Cart() {
       alert("Xóa sản phẩm thất bại");
     }
   };
+
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
       const discountedPrice =
@@ -132,7 +96,6 @@ export default function Cart() {
   };
 
   const handleCheckout = () => {
-    // Navigate to payment page
     navigate("/payment");
   };
 
@@ -202,16 +165,10 @@ export default function Cart() {
                   {item.discount > 0 && (
                     <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded-full">
                       -{item.discount}%
->>>>>>> Stashed changes
                     </div>
+                  )}
                 </div>
-            ))}
 
-<<<<<<< Updated upstream
-            <div className="row mt-5">
-                <div className="col-lg-10 text-end">{t("tong_cong")}:</div>
-                <div className="col-lg-2">{total.toLocaleString()} VNĐ</div>
-=======
                 {/* Thông tin sản phẩm */}
                 <div className="flex-1 p-4 sm:p-6 flex flex-col">
                   <div className="flex justify-between mb-2">
@@ -219,9 +176,6 @@ export default function Cart() {
                       <h3 className="text-lg font-bold text-gray-800">
                         {item.color}
                       </h3>
-                      {/*<p className="text-sm text-gray-600">*/}
-                      {/*  {item.brandName} | {item.category}*/}
-                      {/*</p>*/}
                     </div>
                     <button
                       onClick={() => handleRemoveItem(item.id)}
@@ -291,11 +245,7 @@ export default function Cart() {
               {/* Nút thao tác bổ sung */}
               <div className="bg-gray-50 px-4 py-3 flex justify-between border-t border-gray-200">
                 <Link
-                  to={`/productdetail/${
-                    item.versionID
-                  }?version=${encodeURIComponent(
-                    item.version
-                  )}&color=${encodeURIComponent(item.color)}`}
+                  to={`/productdetail/${item.versionID}?version=${encodeURIComponent(item.version)}&color=${encodeURIComponent(item.color)}`}
                   className="text-blue-600 text-sm hover:underline"
                 >
                   Xem chi tiết xe
@@ -311,69 +261,133 @@ export default function Cart() {
                   </button>
                 </div>
               </div>
->>>>>>> Stashed changes
+            </div>
+          ))}
+        </div>
+
+        {/* Tóm tắt đơn hàng */}
+        <div className="lg:col-span-1 h-fit">
+          <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 sticky top-4">
+            <h2 className="text-xl font-bold mb-4 pb-2 border-b border-gray-200">
+              Tóm tắt đơn hàng
+            </h2>
+
+            <div className="space-y-3 mb-4">
+              <div className="flex justify-between text-gray-600">
+                <span>Tạm tính:</span>
+                <span>{calculateTotal().toLocaleString()} VNĐ</span>
+              </div>
+
+              {calculateSavings() > 0 && (
+                <div className="flex justify-between text-green-600">
+                  <span>Tiết kiệm:</span>
+                  <span>-{calculateSavings().toLocaleString()} VNĐ</span>
+                </div>
+              )}
+
+              <div className="flex justify-between text-gray-600">
+                <span>Phí đăng ký:</span>
+                <span>Theo quy định</span>
+              </div>
             </div>
 
-            <Button className="mt-3" onClick={() => setShowModal(true)}>
-                {t("mua_tat_ca")} ({selectedItems.length})
-            </Button>
+            <div className="border-t border-gray-200 pt-3 mb-6">
+              <div className="flex justify-between font-bold">
+                <span className="text-lg">Tổng tiền:</span>
+                <span className="text-xl text-red-600">
+                  {calculateTotal().toLocaleString()} VNĐ
+                </span>
+              </div>
+              <p className="text-xs text-gray-500 mt-1">
+                * Giá đã bao gồm VAT, chưa bao gồm phí đăng ký biển số.
+              </p>
+            </div>
 
-            <Modal show={showModal} onHide={() => setShowModal(false)} size="lg">
-                <Modal.Header closeButton>
-                    <Modal.Title>{t("gui_lich_hen")}</Modal.Title>
-                </Modal.Header>
-                <Modal.Body>
-                    <form onSubmit={handleAppointmentSubmit}>
-                        <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder={t("ten_cua_ban")}
-                            required
-                            value={appointment.name}
-                            onChange={(e) => setAppointment({...appointment, name: e.target.value})}
-                        />
-                        <input
-                            type="email"
-                            className="form-control mb-2"
-                            placeholder="Email"
-                            required
-                            value={appointment.email}
-                            onChange={(e) => setAppointment({...appointment, email: e.target.value})}
-                        />
-                        <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder={t("so_dien_thoai")}
-                            required
-                            value={appointment.phone}
-                            onChange={(e) => setAppointment({...appointment, phone: e.target.value})}
-                        />
-                        <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder={t("cccd")}
-                            required
-                            value={appointment.cccd}
-                            onChange={(e) => setAppointment({...appointment, cccd: e.target.value})}
-                        />
-                        <input
-                            type="date"
-                            className="form-control mb-2"
-                            required
-                            value={appointment.date}
-                            onChange={(e) => setAppointment({...appointment, date: e.target.value})}
-                        />
-                        <input
-                            type="text"
-                            className="form-control mb-2"
-                            placeholder={t("ghi_chu")}
-                            value={appointment.content}
-                            onChange={(e) => setAppointment({...appointment, content: e.target.value})}
-                        />
-                        <Button type="submit">{t("gui_lich_hen")}</Button>
-                    </form>
-                </Modal.Body>
-            </Modal>
+            <div className="space-y-3">
+              <button
+                onClick={handleCheckout}
+                className="w-full bg-red-600 hover:bg-red-700 text-white py-3 rounded-md transition flex items-center justify-center"
+              >
+                <ShoppingCart size={18} className="mr-2" />
+                Tiếp tục đặt hàng
+              </button>
+
+              <button
+                onClick={handleScheduleVisit}
+                className="w-full bg-white border border-red-600 text-red-600 py-3 rounded-md hover:bg-red-50 transition flex items-center justify-center"
+              >
+                <Calendar size={18} className="mr-2" />
+                Đặt lịch xem xe
+              </button>
+            </div>
+
+            <div className="mt-4 p-3 bg-blue-50 rounded-md">
+              <div className="flex">
+                <Info
+                  size={16}
+                  className="text-blue-600 flex-shrink-0 mt-0.5 mr-2"
+                />
+                <p className="text-xs text-blue-700">
+                  Để đảm bảo tính pháp lý khi mua xe, quý khách vui lòng đến
+                  showroom để hoàn thiện hồ sơ và thủ tục đăng ký. Nhân viên tư
+                  vấn sẽ liên hệ sau khi bạn xác nhận đơn hàng.
+                </p>
+              </div>
+            </div>
+
+            <div className="mt-4 space-y-1">
+              <div className="flex items-center text-sm text-gray-600">
+                <svg
+                  className="w-4 h-4 text-green-500 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Hỗ trợ trả góp 0% lãi suất
+              </div>
+              <div className="flex items-center text-sm text-gray-600">
+                <svg
+                  className="w-4 h-4 text-green-500 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Bảo hành chính hãng 3 năm
+              </div>
+              <div className="flex items-center text-sm text-gray-600">
+                <svg
+                  className="w-4 h-4 text-green-500 mr-2"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth="2"
+                    d="M5 13l4 4L19 7"
+                  ></path>
+                </svg>
+                Tư vấn đăng ký, đăng kiểm
+              </div>
+            </div>
+          </div>
         </div>
-    )
+      </div>
+    </div>
+  );
 }

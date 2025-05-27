@@ -9,23 +9,25 @@ import Products from "./Components/Products.jsx";
 import HomePage from "./Components/HomePage.jsx";
 import LoginPage from "./Components/Account/Login.jsx";
 import RegisterPage from "./Components/Account/Resigter.jsx";
+import ForgotPasswordPage from "./Components/Account/ForgotPassword.jsx";
+import ResetPasswordPage from "./Components/Account/ResetPassword.jsx";
 import CustomerProfile from "./Components/Account/Profile.jsx";
 import ScrollRestoration from "./Components/ScrollRestoration.jsx";
 import Cart from "./Components/Cart.jsx";
 import ProductDetail from "./Components/ProductDetails.jsx";
-<<<<<<< Updated upstream
-=======
 import VerifyEmail from "./Components/Account/VerifyEmail.jsx";
 import Payment from "./Components/Payment.jsx";
 import PaymentResult from "./Components/PaymentResult.jsx";
 import Orders from "./Components/Account/Orders.jsx";
->>>>>>> Stashed changes
 
 const App = () => {
   return (
     <Routes>
       <Route path="login" element={<LoginPage />} />
       <Route path="resigter" element={<RegisterPage />} />
+      <Route path="verify-email" element={<VerifyEmail />} />
+      <Route path="forgot-password" element={<ForgotPasswordPage />} />
+      <Route path="reset-password" element={<ResetPasswordPage />} />
       <Route element={<Header />}>
         <Route index element={<HomePage />} />
         <Route path="about" element={<About />} />
@@ -41,16 +43,11 @@ const App = () => {
             </>
           }
         />
-<<<<<<< Updated upstream
-          <Route path="productdetail/:id" element={<ProductDetail/>} />
-          <Route path="cart" element={<Cart/>} />
-=======
         <Route path="productdetail/:id" element={<ProductDetail />} />
         <Route path="cart" element={<Cart />} />
         <Route path="payment" element={<Payment />} />
         <Route path="payment-result" element={<PaymentResult />} />
         <Route path="account/orders" element={<Orders />} />
->>>>>>> Stashed changes
       </Route>
     </Routes>
   );
