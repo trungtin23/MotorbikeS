@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link ,useSearchParams } from "react-router-dom";
 import {
   ShoppingCart,
   Heart,
@@ -12,9 +12,11 @@ import {
   Info,
   CircleDollarSign,
 } from "lucide-react";
-
 export default function ProductDetail() {
   const { id } = useParams();
+  const [searchParams] = useSearchParams();
+  const versionParam = searchParams.get("version");
+  const colorParam = searchParams.get("color");
   const [product, setProduct] = useState(null);
   const [versionColors, setVersionColors] = useState([]);
   const [selectedColor, setSelectedColor] = useState(null);
@@ -22,6 +24,7 @@ export default function ProductDetail() {
   const [quantity, setQuantity] = useState(1);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("specs");
+
   //anh thay doi theo mau
   const [selectedImage, setSelectedImage] = useState(null);
   useEffect(() => {
@@ -34,13 +37,38 @@ export default function ProductDetail() {
         setVersionColors(res.data.product.versionColors);
 
         // Thiết lập phiên bản và màu mặc định
-          if (res.data.product.versionColors.length > 0) {
-              const firstVersion = res.data.product.versionColors[0];
-              setSelectedVersion(firstVersion);
+        //   if (res.data.product.versionColors.length > 0) {
+        //       const firstVersion = res.data.product.versionColors[0];
+        //       setSelectedVersion(firstVersion);
+        //
+        //       const firstColor = firstVersion.colors?.find(c => c.quantity > 0) || firstVersion.colors[0] || null;
+        //       setSelectedColor(firstColor);
+        //   }
+        let selectedVer = null;
+        let selectedCol = null;
 
-              const firstColor = firstVersion.colors?.find(c => c.quantity > 0) || firstVersion.colors[0] || null;
-              setSelectedColor(firstColor);
-          }
+        if (versionParam) {
+          selectedVer = res.data.product.versionColors.find(
+              (v) => v.versionName === versionParam
+          );
+        }
+
+        if (!selectedVer) {
+          selectedVer = res.data.product.versionColors[0];
+        }
+
+        if (colorParam && selectedVer) {
+          selectedCol = selectedVer.colors.find(
+              (c) => c.color.toLowerCase() === colorParam.toLowerCase()
+          );
+        }
+
+        if (!selectedCol && selectedVer) {
+          selectedCol = selectedVer.colors?.find(c => c.quantity > 0) || selectedVer.colors[0];
+        }
+
+        setSelectedVersion(selectedVer);
+        setSelectedColor(selectedCol);
 
         setLoading(false);
       } catch (err) {
@@ -62,20 +90,25 @@ export default function ProductDetail() {
     if (!selectedColor || !selectedVersion || !product) return;
 
     try {
+      const token = localStorage.getItem("jwtToken");
+
+      if (!token) {
+        alert("Bạn chưa đăng nhập hoặc phiên đăng nhập đã hết hạn");
+        return;
+      }
+
       const payload = {
         id: selectedColor.id,
         color: selectedColor.color,
         price: selectedColor.price,
         quantity: quantity,
         photo: selectedColor.photo,
-        versionName: selectedVersion.versionName,
-        productName: product.name,
-        brandName: product.brandName,
-        category: product.category,
       };
 
       const res = await axios.post("http://localhost:8080/api/cart/add", payload, {
-        withCredentials: true,
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
       });
 
       alert("Sản phẩm đã được thêm vào giỏ hàng!");
