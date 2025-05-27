@@ -1,5 +1,6 @@
 package com.example.cua_hang_xe_may.entities;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.Instant;
@@ -51,12 +52,15 @@ public class Account {
     private String avatar;
 
     @OneToMany(mappedBy = "account")
+    @JsonIgnore
     private Set<Appointment> appointments = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "account")
+    @JsonIgnore
     private Set<Comment> comments = new LinkedHashSet<>();
 
     @OneToMany(mappedBy = "accountID")
+    @JsonIgnore
     private Set<Employee> employees = new LinkedHashSet<>();
 
     public Integer getId() {

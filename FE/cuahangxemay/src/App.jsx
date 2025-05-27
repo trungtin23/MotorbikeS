@@ -13,6 +13,13 @@ import CustomerProfile from "./Components/Account/Profile.jsx";
 import ScrollRestoration from "./Components/ScrollRestoration.jsx";
 import Cart from "./Components/Cart.jsx";
 import ProductDetail from "./Components/ProductDetails.jsx";
+<<<<<<< Updated upstream
+=======
+import VerifyEmail from "./Components/Account/VerifyEmail.jsx";
+import Payment from "./Components/Payment.jsx";
+import PaymentResult from "./Components/PaymentResult.jsx";
+import Orders from "./Components/Account/Orders.jsx";
+>>>>>>> Stashed changes
 
 const App = () => {
   return (
@@ -34,8 +41,16 @@ const App = () => {
             </>
           }
         />
+<<<<<<< Updated upstream
           <Route path="productdetail/:id" element={<ProductDetail/>} />
           <Route path="cart" element={<Cart/>} />
+=======
+        <Route path="productdetail/:id" element={<ProductDetail />} />
+        <Route path="cart" element={<Cart />} />
+        <Route path="payment" element={<Payment />} />
+        <Route path="payment-result" element={<PaymentResult />} />
+        <Route path="account/orders" element={<Orders />} />
+>>>>>>> Stashed changes
       </Route>
     </Routes>
   );
