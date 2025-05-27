@@ -1,14 +1,21 @@
 package com.example.cua_hang_xe_may.controller;
 
 
+import com.example.cua_hang_xe_may.dto.AccountDTO;
+import com.example.cua_hang_xe_may.dto.CartDTO;
 import com.example.cua_hang_xe_may.dto.CartResponseDTO;
 import com.example.cua_hang_xe_may.dto.ProductColorDTO;
+import com.example.cua_hang_xe_may.entities.Cart;
 import com.example.cua_hang_xe_may.entities.Productcolor;
+import com.example.cua_hang_xe_may.service.AccountService;
+import com.example.cua_hang_xe_may.service.CartService;
 import com.example.cua_hang_xe_may.service.ProductService;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.security.Principal;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -17,78 +24,51 @@ import java.util.List;
 public class CartController {
 
     @Autowired
-    private ProductService productService;
+    private CartService cartService;
 
-    private static final String CART_SESSION_KEY = "CART_SESSION";
+    @Autowired
+    private AccountService accountService;
 
     @GetMapping
-    public List<ProductColorDTO> getCart(HttpSession session) {
-        List<ProductColorDTO> cart = (List<ProductColorDTO>) session.getAttribute(CART_SESSION_KEY);
-        if (cart == null) {
-            cart = new ArrayList<>();
-            session.setAttribute(CART_SESSION_KEY, cart);
-        }
-        return cart;
+    public ResponseEntity<List<ProductColorDTO>> getCart(Principal principal) {
+        AccountDTO user = accountService.getAccountByUsername(principal.getName());
+        List<ProductColorDTO> cartItems = cartService.findByUser(user);
+        return ResponseEntity.ok(cartItems);
     }
 
     @PostMapping("/add")
-    public List<ProductColorDTO> addToCart(@RequestBody ProductColorDTO newItem, HttpSession session) {
-        List<ProductColorDTO> cart = (List<ProductColorDTO>) session.getAttribute(CART_SESSION_KEY);
-        if (cart == null) {
-            cart = new ArrayList<>();
-        }
-
-        boolean found = false;
-        for (ProductColorDTO item : cart) {
-            if (item.getId() == newItem.getId()) {
-                item.setQuantity(item.getQuantity() + newItem.getQuantity());
-                found = true;
-                break;
-            }
-        }
-
-        if (!found) {
-            cart.add(newItem);
-        }
-
-        session.setAttribute(CART_SESSION_KEY, cart);
-        return cart;
+    public ResponseEntity<?> addToCart(@RequestBody ProductColorDTO request, Principal principal) {
+        if (principal == null) return ResponseEntity.status(401).body("Chưa đăng nhập");
+        AccountDTO user = accountService.getAccountByUsername(principal.getName());
+        cartService.addToCart(user, request);
+        return ResponseEntity.ok("Thêm vào giỏ hàng thành công");
     }
 
     @PostMapping("/update")
-    public List<ProductColorDTO> updateQuantity(@RequestParam int id, @RequestParam int quantity, HttpSession session) {
-        List<ProductColorDTO> cart = (List<ProductColorDTO>) session.getAttribute(CART_SESSION_KEY);
-        if (cart != null) {
-            for (ProductColorDTO item : cart) {
-                if (item.getId() == id) {
-                    item.setQuantity(quantity);
-                    break;
-                }
-            }
-        }
-        return cart;
+    public String updateQuantity(@RequestParam int productColorId, @RequestParam int quantity, Principal principal) {
+        AccountDTO user = accountService.getAccountByUsername(principal.getName());
+        cartService.updateCartItem(user, productColorId, quantity);
+        return "Cập nhật số lượng thành công";
     }
 
     @DeleteMapping("/remove")
-    public List<ProductColorDTO> removeFromCart(@RequestParam int id, HttpSession session) {
-        List<ProductColorDTO> cart = (List<ProductColorDTO>) session.getAttribute(CART_SESSION_KEY);
-        if (cart != null) {
-            cart.removeIf(item -> item.getId() == id);
-        }
-        return cart;
+    public String removeFromCart(@RequestParam Integer productColorId, Principal principal) {
+        AccountDTO user = accountService.getAccountByUsername(principal.getName());
+        cartService.removeFromCart(user, productColorId);
+        return "Đã xóa sản phẩm khỏi giỏ hàng";
     }
 
     @GetMapping("/total")
-    public CartResponseDTO calculateTotal(HttpSession session) {
-        List<ProductColorDTO> cart = (List<ProductColorDTO>) session.getAttribute(CART_SESSION_KEY);
-        double total = 0;
-        if (cart != null) {
-            for (ProductColorDTO item : cart) {
-                double price = item.getPrice();
-                total += price * item.getQuantity();
-            }
-        }
+    public CartResponseDTO calculateTotal(Principal principal) {
+        AccountDTO user = accountService.getAccountByUsername(principal.getName());
+        List<ProductColorDTO> cartItems = cartService.findByUser(user);
+
+        double total = cartItems.stream()
+                .mapToDouble(item -> item.getPrice() * item.getQuantity())
+                .sum();
+
         return new CartResponseDTO(total);
     }
-
 }
+
+

@@ -14,12 +14,22 @@ export default function Cart() {
   const [cartItems, setCartItems] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Lay cart luu trong session
+  // Lay cart luu trong db
   useEffect(() => {
-    fetch("/api/cart", {
-      credentials: "include",
+    const token = localStorage.getItem("jwtToken");
+
+    fetch("http://localhost:8080/api/cart", {
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
     })
-        .then((res) => res.json())
+        .then((res) => {
+          if (!res.ok) {
+            throw new Error(`HTTP error! Status: ${res.status}`);
+          }
+          return res.json();
+        })
         .then((data) => {
           setCartItems(data);
           setLoading(false);
@@ -33,23 +43,34 @@ export default function Cart() {
 
   const handleQuantityChange = (id, change) => {
     setCartItems((prevItems) =>
-      prevItems.map((item) => {
-        if (item.id === id) {
-          const newQuantity = Math.max(
-            1,
-            Math.min(item.inStock, item.quantity + change)
-          );
-          return { ...item, quantity: newQuantity };
-        }
-        return item;
-      })
+        prevItems.map((item) => {
+          if (item.id === id) {
+            const newQuantity = Math.max(1, item.quantity + change);
+            return { ...item, quantity: newQuantity };
+          }
+          return item;
+        })
     );
   };
-
-  const handleRemoveItem = (id) => {
-    setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+  //Xoa sp khoi cart
+  const handleRemoveItem = async (id) => {
+    const token = localStorage.getItem("jwtToken");
+    try {
+      const res = await fetch(`http://localhost:8080/api/cart/remove?productColorId=${id}`, {
+        method: "DELETE",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+      });
+      if (!res.ok) {
+        throw new Error("Không thể xóa sản phẩm khỏi giỏ hàng");
+      }
+      setCartItems((prevItems) => prevItems.filter((item) => item.id !== id));
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+      alert("Xóa sản phẩm thất bại");
+    }
   };
-
   const calculateTotal = () => {
     return cartItems.reduce((total, item) => {
       const discountedPrice =
@@ -93,7 +114,7 @@ export default function Cart() {
   if (cartItems.length === 0) {
     return (
       <div className="container mx-auto px-4 py-16 text-center">
-        <MotorBike size={64} className="mx-auto text-gray-300 mb-4" />
+        <Cart size={64} className="mx-auto text-gray-300 mb-4" />
         <h2 className="text-2xl font-bold text-gray-800 mb-2">
           Giỏ hàng của bạn đang trống
         </h2>
@@ -133,18 +154,9 @@ export default function Cart() {
                 {/* Hình ảnh sản phẩm */}
                 <div className="w-full sm:w-1/3 h-52 sm:h-auto bg-gray-100 relative">
                   <img
-                    src={`/images/${item.avatar}`}
-                    alt={item.name}
+                      src={`http://localhost:8080/api/files/${item.photo}`}
+                    alt={item.color}
                     className="w-full h-full object-contain p-4"
-                    onError={(e) => {
-                      e.target.onerror = null;
-                      e.target.src =
-                        item.brandName === "Honda"
-                          ? "https://cdn.honda.com.vn/motorbikes/October2022/YiiPIJUwzxYl1mitV9Kx.png"
-                          : item.brandName === "Yamaha"
-                          ? "https://yamaha-motor.com.vn/wp-content/uploads/2023/01/Exciter-155-GP-003.png"
-                          : "https://via.placeholder.com/400x300?text=Xe+máy";
-                    }}
                   />
                   {item.discount > 0 && (
                     <div className="absolute top-2 right-2 bg-red-600 text-white text-xs font-medium px-2 py-1 rounded-full">
@@ -158,11 +170,11 @@ export default function Cart() {
                   <div className="flex justify-between mb-2">
                     <div>
                       <h3 className="text-lg font-bold text-gray-800">
-                        {item.name}
+                        {item.color}
                       </h3>
-                      <p className="text-sm text-gray-600">
-                        {item.brandName} | {item.category}
-                      </p>
+                      {/*<p className="text-sm text-gray-600">*/}
+                      {/*  {item.brandName} | {item.category}*/}
+                      {/*</p>*/}
                     </div>
                     <button
                       onClick={() => handleRemoveItem(item.id)}
@@ -179,13 +191,13 @@ export default function Cart() {
                     </div>
                     <div className="text-sm">
                       <span className="text-gray-500">Động cơ:</span>{" "}
-                      <span className="font-medium">{item.engineSize}</span>
+                      <span className="font-medium">{item.engieType}</span>
                     </div>
                     <div className="text-sm flex items-center">
                       <span className="text-gray-500 mr-1">Màu sắc:</span>{" "}
                       <span
                         className="inline-block w-3 h-3 rounded-full mr-1"
-                        style={{ backgroundColor: item.colorValue }}
+                        style={{ backgroundColor: item.value }}
                       ></span>
                       <span className="font-medium">{item.color}</span>
                     </div>
@@ -219,17 +231,9 @@ export default function Cart() {
                     </div>
 
                     <div className="flex flex-col items-end mt-2 sm:mt-0">
-                      {item.discount > 0 && (
-                        <span className="text-sm text-gray-500 line-through">
-                          {item.price.toLocaleString()} VNĐ
+                        <span className="text-xl font-bold text-red-600">
+                          {!isNaN(item.price) ? Number(item.price).toLocaleString() + " VNĐ" : "0 VNĐ"}
                         </span>
-                      )}
-                      <span className="text-xl font-bold text-red-600">
-                        {Math.round(
-                          item.price * (1 - item.discount / 100)
-                        ).toLocaleString()}{" "}
-                        VNĐ
-                      </span>
                     </div>
                   </div>
                 </div>
@@ -238,7 +242,7 @@ export default function Cart() {
               {/* Nút thao tác bổ sung */}
               <div className="bg-gray-50 px-4 py-3 flex justify-between border-t border-gray-200">
                 <Link
-                  to={`/productdetail/${item.id}`}
+                    to={`/productdetail/${item.versionID}?version=${encodeURIComponent(item.version)}&color=${encodeURIComponent(item.color)}`}
                   className="text-blue-600 text-sm hover:underline"
                 >
                   Xem chi tiết xe

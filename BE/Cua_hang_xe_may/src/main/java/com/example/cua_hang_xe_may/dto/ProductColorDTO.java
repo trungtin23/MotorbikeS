@@ -9,6 +9,34 @@ public class ProductColorDTO {
     private String value;
     private Integer quantity;
 
+    private String version;
+    private String engieType;
+    private String fuelConsumption;
+
+    public String getVersion() {
+        return version;
+    }
+
+    public void setVersion(String version) {
+        this.version = version;
+    }
+
+    public String getEngieType() {
+        return engieType;
+    }
+
+    public void setEngieType(String engieType) {
+        this.engieType = engieType;
+    }
+
+    public String getFuelConsumption() {
+        return fuelConsumption;
+    }
+
+    public void setFuelConsumption(String fuelConsumption) {
+        this.fuelConsumption = fuelConsumption;
+    }
+
     public ProductColorDTO(Integer id, Integer versionID, String color, String photo, Double price, String value, Integer quantity) {
         this.id = id;
         this.versionID = versionID;
