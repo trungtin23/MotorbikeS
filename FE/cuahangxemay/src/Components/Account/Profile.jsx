@@ -1,5 +1,4 @@
-import React from "react";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   User,
   Phone,
@@ -11,20 +10,157 @@ import {
   Clock,
   CheckCircle,
   Bike,
+  Edit,
+  Save,
+  X,
 } from "lucide-react";
 
 export default function CustomerProfile() {
   const [activeTab, setActiveTab] = useState("personal");
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [profile, setProfile] = useState(null);
+  const [editForm, setEditForm] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    dob: "",
+  });
 
-  // Dữ liệu mẫu khách hàng
+  // Lấy thông tin profile từ backend
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const token = localStorage.getItem("jwtToken");
+      if (!token) {
+        console.error("No token found");
+        setLoading(false);
+        return;
+      }
+
+      try {
+        const response = await fetch("http://localhost:8080/api/profile", {
+          headers: {
+            "Authorization": `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        setProfile(data);
+        
+        // Khởi tạo form edit với dữ liệu hiện tại
+        setEditForm({
+          name: data.name || "",
+          phone: data.phone || "",
+          address: data.address || "",
+          dob: data.dob ? new Date(data.dob).toISOString().split('T')[0] : "",
+        });
+        
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  const handleEditToggle = () => {
+    if (isEditing) {
+      // Reset form về dữ liệu gốc khi hủy
+      setEditForm({
+        name: profile.name || "",
+        phone: profile.phone || "",
+        address: profile.address || "",
+        dob: profile.dob ? new Date(profile.dob).toISOString().split('T')[0] : "",
+      });
+    }
+    setIsEditing(!isEditing);
+  };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setEditForm(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleSave = async () => {
+    const token = localStorage.getItem("jwtToken");
+    
+    try {
+      const updateData = {
+        name: editForm.name,
+        phone: editForm.phone,
+        address: editForm.address,
+        dob: editForm.dob ? new Date(editForm.dob).toISOString() : null,
+      };
+
+      const response = await fetch("http://localhost:8080/api/profile", {
+        method: "PUT",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(updateData),
+      });
+
+      if (!response.ok) {
+        throw new Error(`HTTP error! status: ${response.status}`);
+      }
+
+      const result = await response.json();
+      
+      if (result.success) {
+        // Cập nhật profile với dữ liệu mới
+        setProfile(prev => ({
+          ...prev,
+          name: editForm.name,
+          phone: editForm.phone,
+          address: editForm.address,
+          dob: editForm.dob ? new Date(editForm.dob).toISOString() : prev.dob,
+        }));
+        
+        setIsEditing(false);
+        alert("Cập nhật thông tin thành công!");
+      } else {
+        alert(result.message || "Có lỗi xảy ra khi cập nhật thông tin");
+      }
+    } catch (error) {
+      console.error("Error updating profile:", error);
+      alert("Có lỗi xảy ra khi cập nhật thông tin");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex justify-center items-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-red-600"></div>
+      </div>
+    );
+  }
+
+  if (!profile) {
+    return (
+      <div className="bg-gray-50 min-h-screen flex justify-center items-center">
+        <div className="text-center">
+          <h2 className="text-xl font-bold text-gray-800 mb-2">Không thể tải thông tin profile</h2>
+          <p className="text-gray-600">Vui lòng đăng nhập lại</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Dữ liệu mẫu cho xe và giao dịch (sẽ được thay thế bằng API thực tế sau)
   const customer = {
     id: "KH-00123",
-    name: "Nguyễn Văn A",
-    phone: "0912345678",
-    email: "nguyenvana@email.com",
-    address: "123 Nguyễn Huệ, Quận 1, TP.HCM",
-    dob: "15/05/1990",
-    joinDate: "10/03/2025",
+    joinDate: profile.created ? new Date(profile.created).toLocaleDateString('vi-VN') : "N/A",
     motorbike: {
       model: "Honda Wave RSX",
       licensePlate: "59F1-12345",
@@ -67,9 +203,9 @@ export default function CustomerProfile() {
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
           <div className="flex items-center">
             <Bike className="mr-2" size={24} />
-            <h1 className="text-xl font-bold">QUẢN LÝ KHÁCH HÀNG XE MÁY</h1>
+            <h1 className="text-xl font-bold">HỒ SƠ CÁ NHÂN</h1>
           </div>
-          <div className="text-sm">Ngày: 15/05/2025</div>
+          <div className="text-sm">Ngày: {new Date().toLocaleDateString('vi-VN')}</div>
         </div>
       </div>
 
@@ -84,12 +220,12 @@ export default function CustomerProfile() {
                   <User className="text-red-600" size={32} />
                 </div>
                 <div>
-                  <h2 className="text-2xl font-bold">{customer.name}</h2>
-                  <p className="text-red-100">Mã KH: {customer.id}</p>
+                  <h2 className="text-2xl font-bold">{profile.name || profile.username}</h2>
+                  <p className="text-red-100">Username: {profile.username}</p>
                 </div>
               </div>
               <div className="bg-white text-red-600 px-4 py-2 rounded-full font-bold">
-                Khách hàng VIP
+                {profile.role === "0" ? "Admin" : profile.role === "1" ? "User" : "Manager"}
               </div>
             </div>
           </div>
@@ -133,39 +269,145 @@ export default function CustomerProfile() {
             {/* Personal Information Tab */}
             {activeTab === "personal" && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                  Thông tin liên hệ
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <div className="flex items-center">
-                    <Phone className="text-red-600 mr-3" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Số điện thoại</p>
-                      <p className="font-medium">{customer.phone}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Mail className="text-red-600 mr-3" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium">{customer.email}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <MapPin className="text-red-600 mr-3" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Địa chỉ</p>
-                      <p className="font-medium">{customer.address}</p>
-                    </div>
-                  </div>
-                  <div className="flex items-center">
-                    <Calendar className="text-red-600 mr-3" size={20} />
-                    <div>
-                      <p className="text-sm text-gray-500">Ngày sinh</p>
-                      <p className="font-medium">{customer.dob}</p>
-                    </div>
-                  </div>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                    Thông tin liên hệ
+                  </h3>
+                  <button
+                    onClick={handleEditToggle}
+                    className="flex items-center px-3 py-1 text-sm border border-red-600 text-red-600 rounded hover:bg-red-50"
+                  >
+                    {isEditing ? (
+                      <>
+                        <X size={16} className="mr-1" />
+                        Hủy
+                      </>
+                    ) : (
+                      <>
+                        <Edit size={16} className="mr-1" />
+                        Chỉnh sửa
+                      </>
+                    )}
+                  </button>
                 </div>
+
+                {isEditing ? (
+                  // Form chỉnh sửa
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Họ và tên
+                      </label>
+                      <input
+                        type="text"
+                        name="name"
+                        value={editForm.name}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Nhập họ và tên"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Số điện thoại
+                      </label>
+                      <input
+                        type="tel"
+                        name="phone"
+                        value={editForm.phone}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Nhập số điện thoại"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Email (không thể chỉnh sửa)
+                      </label>
+                      <input
+                        type="email"
+                        value={profile.email}
+                        disabled
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md bg-gray-100 text-gray-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Ngày sinh
+                      </label>
+                      <input
+                        type="date"
+                        name="dob"
+                        value={editForm.dob}
+                        onChange={handleInputChange}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-2">
+                        Địa chỉ
+                      </label>
+                      <textarea
+                        name="address"
+                        value={editForm.address}
+                        onChange={handleInputChange}
+                        rows="3"
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-red-500"
+                        placeholder="Nhập địa chỉ"
+                      />
+                    </div>
+                    <div className="md:col-span-2">
+                      <button
+                        onClick={handleSave}
+                        className="flex items-center px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                      >
+                        <Save size={16} className="mr-2" />
+                        Lưu thay đổi
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  // Hiển thị thông tin
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="flex items-center">
+                      <User className="text-red-600 mr-3" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">Họ và tên</p>
+                        <p className="font-medium">{profile.name || "Chưa cập nhật"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Phone className="text-red-600 mr-3" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">Số điện thoại</p>
+                        <p className="font-medium">{profile.phone || "Chưa cập nhật"}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Mail className="text-red-600 mr-3" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">Email</p>
+                        <p className="font-medium">{profile.email}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center">
+                      <Calendar className="text-red-600 mr-3" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">Ngày sinh</p>
+                        <p className="font-medium">
+                          {profile.dob ? new Date(profile.dob).toLocaleDateString('vi-VN') : "Chưa cập nhật"}
+                        </p>
+                      </div>
+                    </div>
+                    <div className="flex items-start md:col-span-2">
+                      <MapPin className="text-red-600 mr-3 mt-1" size={20} />
+                      <div>
+                        <p className="text-sm text-gray-500">Địa chỉ</p>
+                        <p className="font-medium">{profile.address || "Chưa cập nhật"}</p>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 <h3 className="text-lg font-semibold text-gray-800 border-b pb-2 mt-8">
                   Thông tin tài khoản
@@ -183,7 +425,7 @@ export default function CustomerProfile() {
                     <div>
                       <p className="text-sm text-gray-500">Trạng thái</p>
                       <p className="font-medium text-green-600">
-                        Đang hoạt động
+                        {profile.status === "ACTIVE" ? "Đang hoạt động" : "Chưa kích hoạt"}
                       </p>
                     </div>
                   </div>
@@ -337,12 +579,20 @@ export default function CustomerProfile() {
 
           {/* Footer Actions */}
           <div className="bg-gray-50 px-6 py-4 flex justify-end space-x-3">
-            <button className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50">
+            <button 
+              onClick={() => window.print()}
+              className="px-4 py-2 border border-red-600 text-red-600 rounded hover:bg-red-50"
+            >
               In hồ sơ
             </button>
-            <button className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">
-              Chỉnh sửa
-            </button>
+            {!isEditing && (
+              <button 
+                onClick={handleEditToggle}
+                className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+              >
+                Chỉnh sửa
+              </button>
+            )}
           </div>
         </div>
       </div>

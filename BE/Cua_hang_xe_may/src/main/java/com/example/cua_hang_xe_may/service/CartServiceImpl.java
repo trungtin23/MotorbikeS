@@ -50,6 +50,8 @@ public class CartServiceImpl implements CartService {
             //Product
             dto.setEngieType(productColor.getVersionID().getProduct().getEngieType());
             dto.setFuelConsumption(productColor.getVersionID().getProduct().getFuelConsumption());
+            // Thêm tên sản phẩm
+            dto.setProductName(productColor.getVersionID().getProduct().getName());
 
             return dto;
         }).filter(Objects::nonNull).collect(Collectors.toList());

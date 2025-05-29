@@ -174,7 +174,7 @@ export default function Cart() {
                   <div className="flex justify-between mb-2">
                     <div>
                       <h3 className="text-lg font-bold text-gray-800">
-                        {item.color}
+                        {item.productName || item.version}
                       </h3>
                     </div>
                     <button
