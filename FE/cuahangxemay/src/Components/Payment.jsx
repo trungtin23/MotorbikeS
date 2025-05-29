@@ -21,7 +21,7 @@ export default function Payment() {
         const response = await fetch("http://localhost:8080/api/cart", {
           headers: {
             "Content-Type": "application/json",
-            "Authorization": `Bearer ${token}`,
+            Authorization: `Bearer ${token}`,
           },
         });
 
@@ -30,6 +30,14 @@ export default function Payment() {
         }
 
         const data = await response.json();
+
+        // ✅ Debug log để xem cấu trúc data
+        console.log("Cart items full data:", data);
+        if (data.length > 0) {
+          console.log("First item structure:", data[0]);
+          console.log("Available fields:", Object.keys(data[0]));
+        }
+
         setCartItems(data);
         setLoading(false);
       } catch (error) {
@@ -71,7 +79,7 @@ export default function Payment() {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "Authorization": `Bearer ${token}`,
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify({
           shippingName: shippingInfo.name,
@@ -88,7 +96,6 @@ export default function Payment() {
 
       // Redirect to VNPay payment page
       window.location.href = data.paymentUrl;
-
     } catch (error) {
       console.error("Error creating payment:", error);
       alert("Không thể tạo thanh toán. Vui lòng thử lại sau.");
@@ -221,10 +228,14 @@ export default function Payment() {
 
             <div className="mt-4 p-3 bg-blue-50 rounded-md">
               <div className="flex">
-                <Info size={16} className="text-blue-600 flex-shrink-0 mt-0.5 mr-2" />
+                <Info
+                  size={16}
+                  className="text-blue-600 flex-shrink-0 mt-0.5 mr-2"
+                />
                 <p className="text-xs text-blue-700">
-                  Sau khi xác nhận thông tin, bạn sẽ được chuyển đến cổng thanh toán VNPay để hoàn tất giao dịch. 
-                  Vui lòng không đóng trình duyệt trong quá trình thanh toán.
+                  Sau khi xác nhận thông tin, bạn sẽ được chuyển đến cổng thanh
+                  toán VNPay để hoàn tất giao dịch. Vui lòng không đóng trình
+                  duyệt trong quá trình thanh toán.
                 </p>
               </div>
             </div>
@@ -240,25 +251,39 @@ export default function Payment() {
 
             <div className="max-h-60 overflow-y-auto mb-4">
               {cartItems.map((item) => (
-                <div key={item.id} className="flex py-2 border-b border-gray-100">
+                <div
+                  key={item.id}
+                  className="flex py-2 border-b border-gray-100"
+                >
                   <div className="w-16 h-16 bg-gray-100 rounded overflow-hidden mr-3 flex-shrink-0">
                     <img
-                      src={item.photo}
-                      alt={item.color}
+                      src={
+                        item.photo
+                          ? `http://localhost:8080/api/files/${item.photo}`
+                          : "https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=No+Image"
+                      }
+                      alt={item.color || "Sản phẩm"}
                       className="w-full h-full object-cover"
                       onError={(e) => {
                         e.target.onerror = null;
-                        e.target.src = "https://via.placeholder.com/64?text=Xe+máy";
+                        e.target.src =
+                          "https://via.placeholder.com/64x64/f3f4f6/9ca3af?text=No+Image";
                       }}
                     />
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-medium">{item.version}</p>
+                    {/* ✅ Hiển thị cả tên sản phẩm và phiên bản */}
+                    <p className="text-sm font-medium text-gray-800">
+                      {item.productName || item.name || "Sản phẩm"}
+                    </p>
+                    <p className="text-xs text-gray-600 mb-1">
+                      {item.version && `Phiên bản: ${item.version}`}
+                    </p>
                     <p className="text-xs text-gray-500">
-                      Màu: {item.color} | SL: {item.quantity}
+                      Màu: {item.color || "N/A"} | SL: {item.quantity || 0}
                     </p>
                     <p className="text-sm font-bold text-red-600">
-                      {item.price.toLocaleString()} VNĐ
+                      {(item.price || 0).toLocaleString()} VNĐ
                     </p>
                   </div>
                 </div>
