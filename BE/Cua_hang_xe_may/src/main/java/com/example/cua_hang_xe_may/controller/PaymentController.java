@@ -92,7 +92,7 @@ public class PaymentController {
         boolean paymentSuccess = paymentService.processPaymentResponse(vnpParams);
 
         // Redirect to frontend with payment result
-        String frontendUrl = "http://localhost:5174/payment-result";
+        String frontendUrl = "http://localhost:5173/payment-result";
         String redirectUrl = frontendUrl + "?success=" + paymentSuccess;
 
         if (paymentSuccess) {

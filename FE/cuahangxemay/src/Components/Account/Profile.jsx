@@ -20,6 +20,8 @@ export default function CustomerProfile() {
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [profile, setProfile] = useState(null);
+  const [transactions, setTransactions] = useState([]);
+  const [transactionsLoading, setTransactionsLoading] = useState(false);
   const [editForm, setEditForm] = useState({
     name: "",
     phone: "",
@@ -69,6 +71,90 @@ export default function CustomerProfile() {
 
     fetchProfile();
   }, []);
+
+  // Lấy lịch sử giao dịch khi tab transactions được chọn
+  useEffect(() => {
+    if (activeTab === "transactions" && transactions.length === 0) {
+      fetchTransactions();
+    }
+  }, [activeTab]);
+
+  const fetchTransactions = async () => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) return;
+
+    setTransactionsLoading(true);
+    try {
+      const response = await fetch("http://localhost:8080/api/profile/orders", {
+        headers: {
+          "Authorization": `Bearer ${token}`,
+          "Content-Type": "application/json",
+        },
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setTransactions(data);
+      } else {
+        console.error("Error fetching transactions:", response.status);
+      }
+    } catch (error) {
+      console.error("Error fetching transactions:", error);
+    } finally {
+      setTransactionsLoading(false);
+    }
+  };
+
+  const getStatusColor = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+      case 'hoàn thành':
+      case 'success':
+        return 'bg-green-100 text-green-800';
+      case 'pending':
+      case 'chờ xử lý':
+      case 'processing':
+        return 'bg-yellow-100 text-yellow-800';
+      case 'cancelled':
+      case 'đã hủy':
+      case 'failed':
+        return 'bg-red-100 text-red-800';
+      default:
+        return 'bg-blue-100 text-blue-800';
+    }
+  };
+
+  const getStatusText = (status) => {
+    switch (status?.toLowerCase()) {
+      case 'completed':
+        return 'Hoàn thành';
+      case 'pending':
+        return 'Chờ xử lý';
+      case 'processing':
+        return 'Đang xử lý';
+      case 'cancelled':
+        return 'Đã hủy';
+      case 'failed':
+        return 'Thất bại';
+      case 'success':
+        return 'Thành công';
+      default:
+        return status || 'Không xác định';
+    }
+  };
+
+  const getPaymentMethodText = (method) => {
+    switch (method?.toLowerCase()) {
+      case 'vnpay':
+        return 'VNPay';
+      case 'cod':
+        return 'Thanh toán khi nhận hàng';
+      case 'bank_transfer':
+        return 'Chuyển khoản ngân hàng';
+      default:
+        return method || 'Không xác định';
+    }
+  };
 
   const handleEditToggle = () => {
     if (isEditing) {
@@ -157,7 +243,7 @@ export default function CustomerProfile() {
     );
   }
 
-  // Dữ liệu mẫu cho xe và giao dịch (sẽ được thay thế bằng API thực tế sau)
+  // Dữ liệu mẫu cho xe (sẽ được thay thế bằng API thực tế sau)
   const customer = {
     id: "KH-00123",
     joinDate: profile.created ? new Date(profile.created).toLocaleDateString('vi-VN') : "N/A",
@@ -170,22 +256,6 @@ export default function CustomerProfile() {
       engineNumber: "VINHC12345678",
       chassisNumber: "HNDA9876543210",
     },
-    transactions: [
-      {
-        id: "HD-00456",
-        date: "15/04/2025",
-        amount: "25.500.000 VNĐ",
-        type: "Mua xe mới",
-        status: "Hoàn thành",
-      },
-      {
-        id: "DV-00078",
-        date: "02/05/2025",
-        amount: "350.000 VNĐ",
-        type: "Bảo dưỡng lần 1",
-        status: "Đã thanh toán",
-      },
-    ],
     serviceHistory: [
       {
         date: "02/05/2025",
@@ -519,60 +589,115 @@ export default function CustomerProfile() {
             {/* Transactions Tab */}
             {activeTab === "transactions" && (
               <div className="space-y-6">
-                <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
-                  Lịch sử giao dịch
-                </h3>
-                <div className="overflow-x-auto">
-                  <table className="min-w-full bg-white">
-                    <thead className="bg-red-50">
-                      <tr>
-                        <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
-                          Mã giao dịch
-                        </th>
-                        <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
-                          Ngày
-                        </th>
-                        <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
-                          Loại giao dịch
-                        </th>
-                        <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
-                          Số tiền
-                        </th>
-                        <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
-                          Trạng thái
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                      {customer.transactions.map((transaction, index) => (
-                        <tr
-                          key={index}
-                          className={
-                            index % 2 === 0 ? "bg-white" : "bg-gray-50"
-                          }
-                        >
-                          <td className="py-3 px-4 text-sm">
-                            {transaction.id}
-                          </td>
-                          <td className="py-3 px-4 text-sm">
-                            {transaction.date}
-                          </td>
-                          <td className="py-3 px-4 text-sm">
-                            {transaction.type}
-                          </td>
-                          <td className="py-3 px-4 text-sm font-medium">
-                            {transaction.amount}
-                          </td>
-                          <td className="py-3 px-4">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                              {transaction.status}
-                            </span>
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
+                <div className="flex justify-between items-center">
+                  <h3 className="text-lg font-semibold text-gray-800 border-b pb-2">
+                    Lịch sử giao dịch
+                  </h3>
+                  <button
+                    onClick={fetchTransactions}
+                    className="px-3 py-1 text-sm bg-red-600 text-white rounded hover:bg-red-700"
+                    disabled={transactionsLoading}
+                  >
+                    {transactionsLoading ? "Đang tải..." : "Làm mới"}
+                  </button>
                 </div>
+
+                {transactionsLoading ? (
+                  <div className="flex justify-center items-center py-12">
+                    <div className="animate-spin rounded-full h-8 w-8 border-t-2 border-b-2 border-red-600"></div>
+                  </div>
+                ) : transactions.length === 0 ? (
+                  <div className="text-center py-12">
+                    <p className="text-gray-500 mb-4">Chưa có giao dịch nào</p>
+                    <p className="text-sm text-gray-400">Hãy thực hiện đơn hàng đầu tiên của bạn</p>
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="min-w-full bg-white">
+                      <thead className="bg-red-50">
+                        <tr>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Mã đơn hàng
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Ngày đặt
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Sản phẩm chính
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Số lượng
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Tổng tiền
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Thanh toán
+                          </th>
+                          <th className="py-3 px-4 text-left text-sm font-medium text-red-800">
+                            Trạng thái
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-100">
+                        {transactions.map((transaction, index) => (
+                          <tr
+                            key={transaction.id}
+                            className={
+                              index % 2 === 0 ? "bg-white" : "bg-gray-50"
+                            }
+                          >
+                            <td className="py-3 px-4 text-sm font-medium text-blue-600">
+                              {transaction.orderId}
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              {new Date(transaction.orderDate).toLocaleDateString('vi-VN')}
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              <div className="max-w-xs truncate" title={transaction.mainProductName}>
+                                {transaction.mainProductName}
+                              </div>
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              {transaction.totalItems} sản phẩm
+                            </td>
+                            <td className="py-3 px-4 text-sm font-medium">
+                              {Number(transaction.totalAmount).toLocaleString()} VNĐ
+                            </td>
+                            <td className="py-3 px-4 text-sm">
+                              {getPaymentMethodText(transaction.paymentMethod)}
+                            </td>
+                            <td className="py-3 px-4">
+                              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(transaction.status)}`}>
+                                {getStatusText(transaction.status)}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+
+                    {/* Thống kê tóm tắt */}
+                    <div className="mt-6 grid grid-cols-1 md:grid-cols-3 gap-4">
+                      <div className="bg-blue-50 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-blue-800 mb-1">Tổng đơn hàng</h4>
+                        <p className="text-xl font-bold text-blue-900">{transactions.length}</p>
+                      </div>
+                      <div className="bg-green-50 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-green-800 mb-1">Tổng chi tiêu</h4>
+                        <p className="text-xl font-bold text-green-900">
+                          {transactions.reduce((sum, t) => sum + (t.totalAmount || 0), 0).toLocaleString()} VNĐ
+                        </p>
+                      </div>
+                      <div className="bg-purple-50 p-4 rounded-lg">
+                        <h4 className="text-sm font-medium text-purple-800 mb-1">Đơn hoàn thành</h4>
+                        <p className="text-xl font-bold text-purple-900">
+                          {transactions.filter(t => ['completed', 'success', 'hoàn thành'].includes(t.status?.toLowerCase())).length}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             )}
           </div>
