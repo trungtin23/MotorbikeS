@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
-import { useParams, Link ,useSearchParams } from "react-router-dom";
+import { useParams, Link, useSearchParams } from "react-router-dom";
 import {
   ShoppingCart,
   Heart,
@@ -11,7 +11,10 @@ import {
   CheckCircle2,
   Info,
   CircleDollarSign,
+  Star,
+  StarOff,
 } from "lucide-react";
+
 export default function ProductDetail() {
   const { id } = useParams();
   const [searchParams] = useSearchParams();
@@ -25,8 +28,162 @@ export default function ProductDetail() {
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("specs");
 
+  // States cho comments/reviews
+  const [comments, setComments] = useState([]);
+  const [ratingStats, setRatingStats] = useState({
+    averageRating: 0,
+    totalReviews: 0,
+    ratingDistribution: {},
+  });
+  const [canUserReview, setCanUserReview] = useState({
+    canReview: false,
+    hasPurchased: false,
+    hasReviewed: false,
+  });
+  const [newReview, setNewReview] = useState({
+    rating: 0,
+    content: "",
+  });
+  const [submittingReview, setSubmittingReview] = useState(false);
+
   //anh thay doi theo mau
   const [selectedImage, setSelectedImage] = useState(null);
+
+  // Functions cho comments/reviews
+  const fetchComments = async () => {
+    try {
+      console.log("Fetching comments for product:", id);
+      const response = await axios.get(
+        `http://localhost:8080/api/comments/product/${id}`
+      );
+      console.log("Comments response:", response.data);
+      setComments(response.data);
+    } catch (error) {
+      console.error("Error fetching comments:", error);
+      console.error("Error details:", error.response?.data);
+    }
+  };
+
+  const fetchRatingStats = async () => {
+    try {
+      console.log("Fetching rating stats for product:", id);
+      const response = await axios.get(
+        `http://localhost:8080/api/comments/product/${id}/rating-stats`
+      );
+      console.log("Rating stats response:", response.data);
+      setRatingStats(response.data);
+    } catch (error) {
+      console.error("Error fetching rating stats:", error);
+      console.error("Error details:", error.response?.data);
+    }
+  };
+
+  const checkCanUserReview = async () => {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      console.log("No token found, user cannot review");
+      setCanUserReview({
+        canReview: false,
+        hasPurchased: false,
+        hasReviewed: false,
+      });
+      return;
+    }
+
+    try {
+      console.log("Checking if user can review product:", id);
+      const response = await axios.get(
+        `http://localhost:8080/api/comments/can-review/product/${id}`,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
+      console.log("Can review response:", response.data);
+      setCanUserReview(response.data);
+    } catch (error) {
+      console.error("Error checking review permission:", error);
+      console.error("Error details:", error.response?.data);
+    }
+  };
+
+  const submitReview = async () => {
+    if (newReview.rating === 0) {
+      alert("Vui lòng chọn số sao đánh giá");
+      return;
+    }
+    if (newReview.content.trim() === "") {
+      alert("Vui lòng nhập nội dung đánh giá");
+      return;
+    }
+
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+      alert("Vui lòng đăng nhập để đánh giá");
+      return;
+    }
+
+    setSubmittingReview(true);
+    try {
+      await axios.post(
+        "http://localhost:8080/api/comments",
+        {
+          productId: parseInt(id),
+          content: newReview.content.trim(),
+          rating: newReview.rating,
+        },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        }
+      );
+
+      alert("Đánh giá của bạn đã được gửi thành công!");
+      setNewReview({ rating: 0, content: "" });
+
+      // Refresh data
+      fetchComments();
+      fetchRatingStats();
+      checkCanUserReview();
+    } catch (error) {
+      console.error("Error submitting review:", error);
+      if (error.response?.data?.message) {
+        alert(error.response.data.message);
+      } else {
+        alert("Có lỗi xảy ra khi gửi đánh giá");
+      }
+    } finally {
+      setSubmittingReview(false);
+    }
+  };
+
+  const renderStars = (
+    rating,
+    size = "h-4 w-4",
+    interactive = false,
+    onStarClick = null
+  ) => {
+    return (
+      <div className="flex">
+        {[1, 2, 3, 4, 5].map((star) => (
+          <Star
+            key={star}
+            size={size === "h-4 w-4" ? 16 : size === "h-5 w-5" ? 20 : 24}
+            className={`${size} ${
+              star <= rating ? "text-yellow-400 fill-current" : "text-gray-300"
+            } ${interactive ? "cursor-pointer hover:text-yellow-400" : ""}`}
+            onClick={
+              interactive && onStarClick ? () => onStarClick(star) : undefined
+            }
+          />
+        ))}
+      </div>
+    );
+  };
+
   useEffect(() => {
     async function fetchProductDetail() {
       try {
@@ -49,7 +206,7 @@ export default function ProductDetail() {
 
         if (versionParam) {
           selectedVer = res.data.product.versionColors.find(
-              (v) => v.versionName === versionParam
+            (v) => v.versionName === versionParam
           );
         }
 
@@ -59,12 +216,14 @@ export default function ProductDetail() {
 
         if (colorParam && selectedVer) {
           selectedCol = selectedVer.colors.find(
-              (c) => c.color.toLowerCase() === colorParam.toLowerCase()
+            (c) => c.color.toLowerCase() === colorParam.toLowerCase()
           );
         }
 
         if (!selectedCol && selectedVer) {
-          selectedCol = selectedVer.colors?.find(c => c.quantity > 0) || selectedVer.colors[0];
+          selectedCol =
+            selectedVer.colors?.find((c) => c.quantity > 0) ||
+            selectedVer.colors[0];
         }
 
         setSelectedVersion(selectedVer);
@@ -77,6 +236,15 @@ export default function ProductDetail() {
       }
     }
     fetchProductDetail();
+  }, [id]);
+
+  // Fetch comments and related data when component loads
+  useEffect(() => {
+    if (id) {
+      fetchComments();
+      fetchRatingStats();
+      checkCanUserReview();
+    }
   }, [id]);
 
   // Hàm xử lý khi thay đổi phiên bản
@@ -105,11 +273,15 @@ export default function ProductDetail() {
         photo: selectedColor.photo,
       };
 
-      const res = await axios.post("http://localhost:8080/api/cart/add", payload, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      });
+      const res = await axios.post(
+        "http://localhost:8080/api/cart/add",
+        payload,
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        }
+      );
 
       alert("Sản phẩm đã được thêm vào giỏ hàng!");
       console.log("Cart response:", res.data);
@@ -185,7 +357,9 @@ export default function ProductDetail() {
         <div className="bg-gray-50 rounded-lg overflow-hidden p-4">
           <div className="relative pb-4">
             <img
-                src={`http://localhost:8080/api/files/${selectedImage || product.avatar}`}
+              src={`http://localhost:8080/api/files/${
+                selectedImage || product.avatar
+              }`}
               alt={product.name}
               className="w-full h-auto object-contain rounded-lg"
               style={{ maxHeight: "400px" }}
@@ -268,18 +442,14 @@ export default function ProductDetail() {
 
           <div className="flex items-center mt-2">
             <div className="flex">
-              {[1, 2, 3, 4, 5].map((star) => (
-                <svg
-                  key={star}
-                  className="h-5 w-5 text-yellow-400"
-                  fill="currentColor"
-                  viewBox="0 0 20 20"
-                >
-                  <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                </svg>
-              ))}
+              {renderStars(
+                Math.round(ratingStats.averageRating || 0),
+                "h-4 w-4"
+              )}
             </div>
-            <span className="ml-2 text-gray-600 text-sm">25 đánh giá</span>
+            <span className="ml-2 text-gray-600 text-sm">
+              Có {ratingStats.totalReviews} đánh giá
+            </span>
             <span className="mx-2 text-gray-300">|</span>
             <span className="text-green-600 text-sm">
               Có sẵn {selectedColor?.quantity} xe
@@ -355,20 +525,22 @@ export default function ProductDetail() {
                   }}
                 >
                   <div
-                      className={`w-14 h-14 rounded-full border-2 ${
-                          selectedColor?.color === color.color
-                              ? "border-red-600"
-                              : "border-gray-300"
-                      }`}
+                    className={`w-14 h-14 rounded-full border-2 ${
+                      selectedColor?.color === color.color
+                        ? "border-red-600"
+                        : "border-gray-300"
+                    }`}
                   >
                     <img
-                        src={`http://localhost:8080/api/files/${color.photo || product.avatar}`}
-                        alt={color.color}
-                        className="w-full h-full rounded-full object-cover m-0.5 cursor-pointer"
-                        onClick={() => {
-                          setSelectedColor(color);
-                          setSelectedImage(color.photo || product.avatar);
-                        }}
+                      src={`http://localhost:8080/api/files/${
+                        color.photo || product.avatar
+                      }`}
+                      alt={color.color}
+                      className="w-full h-full rounded-full object-cover m-0.5 cursor-pointer"
+                      onClick={() => {
+                        setSelectedColor(color);
+                        setSelectedImage(color.photo || product.avatar);
+                      }}
                     />
                   </div>
                   <span className="mt-1 text-xs text-gray-700">
@@ -888,180 +1060,145 @@ export default function ProductDetail() {
           )}
 
           {activeTab === "reviews" && (
-            <div className="space-y-8">
+            <div className="space-y-6">
+              {/* Thống kê rating tổng quan */}
               <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Đánh giá từ khách hàng
-                </h3>
-                <div className="flex items-center mb-6">
-                  <div className="flex-shrink-0">
-                    <div className="text-5xl font-bold text-gray-900">4.8</div>
-                    <div className="flex">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg
-                          key={star}
-                          className={`h-5 w-5 ${
-                            star <= 4 ? "text-yellow-400" : "text-gray-300"
-                          }`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="text-center">
+                    <div className="text-4xl font-bold text-gray-900 mb-2">
+                      {ratingStats.averageRating
+                        ? ratingStats.averageRating.toFixed(1)
+                        : "0.0"}
                     </div>
-                    <div className="text-sm text-gray-500">
-                      Dựa trên 25 đánh giá
-                    </div>
-                  </div>
-                  <div className="ml-6 flex-1">
-                    <div className="flex items-center mb-2">
-                      <div className="text-sm text-gray-600 w-12">5 sao</div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div
-                          className="h-2 bg-yellow-400 rounded-full"
-                          style={{ width: "80%" }}
-                        ></div>
-                      </div>
-                      <div className="text-sm text-gray-600 w-12">80%</div>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <div className="text-sm text-gray-600 w-12">4 sao</div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div
-                          className="h-2 bg-yellow-400 rounded-full"
-                          style={{ width: "15%" }}
-                        ></div>
-                      </div>
-                      <div className="text-sm text-gray-600 w-12">15%</div>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <div className="text-sm text-gray-600 w-12">3 sao</div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div
-                          className="h-2 bg-yellow-400 rounded-full"
-                          style={{ width: "5%" }}
-                        ></div>
-                      </div>
-                      <div className="text-sm text-gray-600 w-12">5%</div>
-                    </div>
-                    <div className="flex items-center mb-2">
-                      <div className="text-sm text-gray-600 w-12">2 sao</div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div
-                          className="h-2 bg-yellow-400 rounded-full"
-                          style={{ width: "0%" }}
-                        ></div>
-                      </div>
-                      <div className="text-sm text-gray-600 w-12">0%</div>
-                    </div>
-                    <div className="flex items-center">
-                      <div className="text-sm text-gray-600 w-12">1 sao</div>
-                      <div className="flex-1 h-2 bg-gray-200 rounded-full mx-2">
-                        <div
-                          className="h-2 bg-yellow-400 rounded-full"
-                          style={{ width: "0%" }}
-                        ></div>
-                      </div>
-                      <div className="text-sm text-gray-600 w-12">0%</div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-4">
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-900">
-                        Nguyễn Văn A
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        2 tuần trước
-                      </span>
-                    </div>
-                    <div className="flex mt-1">
-                      {[1, 2, 3, 4, 5].map((star) => (
-                        <svg
-                          key={star}
-                          className="h-4 w-4 text-yellow-400"
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="mt-2 text-gray-600">
-                      Sau 3 tháng sử dụng, xe vẫn chạy rất êm, tiết kiệm xăng và
-                      thiết kế hiện đại, nhiều người hỏi mua. Rất hài lòng với
-                      chất lượng sản phẩm và dịch vụ chăm sóc khách hàng.
+                    {renderStars(
+                      Math.round(ratingStats.averageRating || 0),
+                      "h-6 w-6"
+                    )}
+                    <p className="text-sm text-gray-600 mt-2">
+                      Dựa trên {ratingStats.totalReviews} đánh giá
                     </p>
                   </div>
 
-                  <div className="border-t border-gray-200 pt-4">
-                    <div className="flex justify-between">
-                      <span className="font-medium text-gray-900">
-                        Trần Thị B
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        1 tháng trước
-                      </span>
-                    </div>
-                    <div className="flex mt-1">
-                      {[1, 2, 3, 4, 5].map((star, i) => (
-                        <svg
-                          key={star}
-                          className={`h-4 w-4 ${
-                            i < 5 ? "text-yellow-400" : "text-gray-300"
-                          }`}
-                          fill="currentColor"
-                          viewBox="0 0 20 20"
-                        >
-                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                        </svg>
-                      ))}
-                    </div>
-                    <p className="mt-2 text-gray-600">
-                      Xe rất phù hợp với di chuyển trong thành phố, nhỏ gọn và
-                      dễ điều khiển. Dịch vụ bảo hành nhanh chóng, chu đáo. Chỉ
-                      tiếc là cốp xe hơi nhỏ.
-                    </p>
-                  </div>
-                </div>
-
-                <button className="mt-6 text-sm font-medium text-red-600 hover:text-red-700">
-                  Xem tất cả đánh giá
-                </button>
-              </div>
-
-              <div className="bg-gray-50 p-6 rounded-lg">
-                <h3 className="text-lg font-medium text-gray-900 mb-4">
-                  Viết đánh giá
-                </h3>
-                <div className="flex items-center mb-4">
-                  <span className="text-sm text-gray-700 mr-2">
-                    Đánh giá của bạn:
-                  </span>
-                  <div className="flex">
-                    {[1, 2, 3, 4, 5].map((star) => (
-                      <svg
-                        key={star}
-                        className="h-5 w-5 text-gray-300 cursor-pointer hover:text-yellow-400"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118l-2.799-2.034c-.784-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
-                      </svg>
+                  <div className="space-y-2">
+                    {[5, 4, 3, 2, 1].map((star) => (
+                      <div key={star} className="flex items-center space-x-2">
+                        <span className="text-sm text-gray-600 w-8">
+                          {star} sao
+                        </span>
+                        <div className="flex-1 bg-gray-200 rounded-full h-2">
+                          <div
+                            className="bg-yellow-400 h-2 rounded-full"
+                            style={{
+                              width:
+                                ratingStats.totalReviews > 0
+                                  ? `${
+                                      ((ratingStats.ratingDistribution[star] ||
+                                        0) /
+                                        ratingStats.totalReviews) *
+                                      100
+                                    }%`
+                                  : "0%",
+                            }}
+                          ></div>
+                        </div>
+                        <span className="text-sm text-gray-600 w-8">
+                          {ratingStats.ratingDistribution[star] || 0}
+                        </span>
+                      </div>
                     ))}
                   </div>
                 </div>
-                <textarea
-                  className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-red-500 focus:border-red-500"
-                  rows="4"
-                  placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
-                ></textarea>
-                <button className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium">
-                  Gửi đánh giá
-                </button>
+              </div>
+
+              {/* Form đánh giá - chỉ hiện khi user có thể đánh giá */}
+              {canUserReview.canReview && (
+                <div className="bg-gray-50 p-6 rounded-lg">
+                  <h3 className="text-lg font-medium text-gray-900 mb-4">
+                    Viết đánh giá
+                  </h3>
+                  <div className="flex items-center mb-4">
+                    <span className="text-sm text-gray-700 mr-2">
+                      Đánh giá của bạn:
+                    </span>
+                    {renderStars(newReview.rating, "h-5 w-5", true, (rating) =>
+                      setNewReview((prev) => ({ ...prev, rating }))
+                    )}
+                  </div>
+                  <textarea
+                    className="w-full border border-gray-300 rounded-md p-3 text-sm focus:ring-red-500 focus:border-red-500"
+                    rows="4"
+                    placeholder="Chia sẻ trải nghiệm của bạn về sản phẩm này..."
+                    value={newReview.content}
+                    onChange={(e) =>
+                      setNewReview((prev) => ({
+                        ...prev,
+                        content: e.target.value,
+                      }))
+                    }
+                  ></textarea>
+                  <button
+                    className="mt-4 px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 text-sm font-medium disabled:bg-gray-400 disabled:cursor-not-allowed"
+                    onClick={submitReview}
+                    disabled={submittingReview}
+                  >
+                    {submittingReview ? "Đang gửi..." : "Gửi đánh giá"}
+                  </button>
+                </div>
+              )}
+
+              {/* Thông báo nếu chưa mua hoặc đã đánh giá */}
+              {!canUserReview.canReview && (
+                <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+                  <p className="text-sm text-yellow-800">
+                    {!canUserReview.hasPurchased
+                      ? "Bạn cần mua sản phẩm này để có thể đánh giá."
+                      : canUserReview.hasReviewed
+                      ? "Bạn đã đánh giá sản phẩm này rồi."
+                      : "Vui lòng đăng nhập để đánh giá sản phẩm."}
+                  </p>
+                </div>
+              )}
+
+              {/* Danh sách đánh giá */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium text-gray-900">
+                  Đánh giá từ khách hàng ({ratingStats.totalReviews})
+                </h3>
+
+                {comments.length === 0 ? (
+                  <div className="text-center py-8">
+                    <p className="text-gray-500">
+                      Chưa có đánh giá nào cho sản phẩm này.
+                    </p>
+                    <p className="text-sm text-gray-400 mt-2">
+                      Hãy là người đầu tiên đánh giá!
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {comments.map((comment) => (
+                      <div
+                        key={comment.id}
+                        className="border-t border-gray-200 pt-4"
+                      >
+                        <div className="flex justify-between">
+                          <span className="font-medium text-gray-900">
+                            {comment.name || comment.username}
+                          </span>
+                          <span className="text-sm text-gray-500">
+                            {new Date(comment.created).toLocaleDateString(
+                              "vi-VN"
+                            )}
+                          </span>
+                        </div>
+                        <div className="flex mt-1">
+                          {renderStars(comment.rating)}
+                        </div>
+                        <p className="mt-2 text-gray-600">{comment.content}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1069,9 +1206,7 @@ export default function ProductDetail() {
           {activeTab === "support" && (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div className="bg-gray-50 p-6 rounded-lg">
-                <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4">
-                  <Tool size={24} className="text-red-600" />
-                </div>
+                <div className="flex items-center justify-center w-12 h-12 mx-auto bg-red-100 rounded-full mb-4"></div>
                 <h3 className="text-lg font-medium text-center text-gray-900 mb-2">
                   Chế độ bảo hành
                 </h3>
