@@ -39,6 +39,7 @@ public class SecurityConfig {
                         .requestMatchers("/api/files/**").permitAll()
                         .requestMatchers("/api/payment/vnpay-return").permitAll()
                         .requestMatchers("/api/test/**").permitAll()
+                        .requestMatchers("/api/comments/**").permitAll()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

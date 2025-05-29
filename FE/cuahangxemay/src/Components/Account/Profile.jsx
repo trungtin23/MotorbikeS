@@ -110,14 +110,18 @@ export default function CustomerProfile() {
       case 'completed':
       case 'hoàn thành':
       case 'success':
+      case 'paid':
+      case 'đã thanh toán':
         return 'bg-green-100 text-green-800';
       case 'pending':
       case 'chờ xử lý':
       case 'processing':
+      case 'đang xử lý':
         return 'bg-yellow-100 text-yellow-800';
       case 'cancelled':
       case 'đã hủy':
       case 'failed':
+      case 'thất bại':
         return 'bg-red-100 text-red-800';
       default:
         return 'bg-blue-100 text-blue-800';
@@ -128,6 +132,8 @@ export default function CustomerProfile() {
     switch (status?.toLowerCase()) {
       case 'completed':
         return 'Hoàn thành';
+      case 'paid':
+        return 'Đã thanh toán';
       case 'pending':
         return 'Chờ xử lý';
       case 'processing':
@@ -692,7 +698,9 @@ export default function CustomerProfile() {
                       <div className="bg-purple-50 p-4 rounded-lg">
                         <h4 className="text-sm font-medium text-purple-800 mb-1">Đơn hoàn thành</h4>
                         <p className="text-xl font-bold text-purple-900">
-                          {transactions.filter(t => ['completed', 'success', 'hoàn thành'].includes(t.status?.toLowerCase())).length}
+                          {transactions.filter(t => 
+                            ['completed', 'success', 'hoàn thành', 'paid', 'đã thanh toán'].includes(t.status?.toLowerCase())
+                          ).length}
                         </p>
                       </div>
                     </div>
