@@ -19,6 +19,8 @@ import VerifyEmail from "./Components/Account/VerifyEmail.jsx";
 import Payment from "./Components/Payment.jsx";
 import PaymentResult from "./Components/PaymentResult.jsx";
 import Orders from "./Components/Account/Orders.jsx";
+import AdminDashboard from "./Components/Admin/AdminDashboard.jsx";
+import AdminDemo from "./Components/Admin/AdminDemo.jsx";
 
 const App = () => {
   return (
@@ -49,6 +51,8 @@ const App = () => {
         <Route path="payment-result" element={<PaymentResult />} />
         <Route path="account/orders" element={<Orders />} />
       </Route>
+      <Route path="admin" element={<AdminDashboard />} />
+      <Route path="admin-demo" element={<AdminDemo />} />
     </Routes>
   );
 };

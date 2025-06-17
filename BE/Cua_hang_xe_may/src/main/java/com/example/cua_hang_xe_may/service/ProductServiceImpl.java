@@ -69,6 +69,13 @@ public class ProductServiceImpl implements ProductService {
                 return productVersionDTO;
             }).collect(Collectors.toList());
             productDTO.setVersionColors(versionDTOS);
+            
+            // Calculate total stock
+            int totalStock = versionDTOS.stream()
+                    .flatMap(version -> version.getColors().stream())
+                    .mapToInt(color -> color.getQuantity() != null ? color.getQuantity() : 0)
+                    .sum();
+            productDTO.setTotalStock(totalStock);
         }
         return productDTO;
     }
@@ -78,7 +85,11 @@ public class ProductServiceImpl implements ProductService {
         productRepository.deleteById(id);
     }
 
-    private ProductDTO mapToDTO(Product product) {
+    /**
+     * Public method to convert Product entity to ProductDTO
+     * Can be used by controllers for mapping
+     */
+    public ProductDTO mapToDTO(Product product) {
         ProductDTO dto = modelMapper.map(product, ProductDTO.class);
         if (product.getBrand() != null) {
             dto.setBrandName(product.getBrand().getName());
@@ -95,8 +106,111 @@ public class ProductServiceImpl implements ProductService {
         Product saved = productRepository.save(product);
         return mapToDTO(saved);
     }
+    
     private Product mapToEntity(ProductDTO dto) {
         return modelMapper.map(dto, Product.class);
     }
 
+    /**
+     * Find products by brand name
+     */
+    public List<ProductDTO> findByBrandName(String brandName) {
+        return productRepository.findAll().stream()
+                .filter(product -> product.getBrand() != null && brandName.equals(product.getBrand().getName()))
+                .map(this::mapToDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find products with low stock
+     */
+    public List<ProductDTO> findLowStockProducts(int threshold) {
+        return findAll().stream()
+                .filter(product -> {
+                    int totalStock = 0;
+                    if (product.getVersionColors() != null) {
+                        totalStock = product.getVersionColors().stream()
+                                .flatMap(version -> version.getColors() != null ? version.getColors().stream() : java.util.stream.Stream.empty())
+                                .mapToInt(color -> color.getQuantity() != null ? color.getQuantity() : 0)
+                                .sum();
+                    }
+                    return totalStock < threshold;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Search products by keyword
+     */
+    public List<ProductDTO> searchProducts(String keyword) {
+        if (keyword == null || keyword.trim().isEmpty()) {
+            return findAll();
+        }
+        
+        String lowerKeyword = keyword.toLowerCase();
+        return findAll().stream()
+                .filter(product -> 
+                    (product.getName() != null && product.getName().toLowerCase().contains(lowerKeyword)) ||
+                    (product.getDescription() != null && product.getDescription().toLowerCase().contains(lowerKeyword)) ||
+                    (product.getBrandName() != null && product.getBrandName().toLowerCase().contains(lowerKeyword)) ||
+                    (product.getEngieType() != null && product.getEngieType().toLowerCase().contains(lowerKeyword))
+                )
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Find products by price range
+     */
+    public List<ProductDTO> findByPriceRange(Double minPrice, Double maxPrice) {
+        return findAll().stream()
+                .filter(product -> {
+                    if (product.getPrice() == null) return false;
+                    boolean aboveMin = minPrice == null || product.getPrice() >= minPrice;
+                    boolean belowMax = maxPrice == null || product.getPrice() <= maxPrice;
+                    return aboveMin && belowMax;
+                })
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get unique brand names
+     */
+    public List<String> getUniqueBrandNames() {
+        return productRepository.findAll().stream()
+                .filter(product -> product.getBrand() != null)
+                .map(product -> product.getBrand().getName())
+                .distinct()
+                .sorted()
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Get products count by brand
+     */
+    public java.util.Map<String, Long> getProductCountByBrand() {
+        return productRepository.findAll().stream()
+                .collect(Collectors.groupingBy(
+                    product -> product.getBrand() != null ? product.getBrand().getName() : "Unknown",
+                    Collectors.counting()
+                ));
+    }
+
+    /**
+     * Check if product exists
+     */
+    public boolean existsById(Integer id) {
+        return productRepository.existsById(id);
+    }
+
+    /**
+     * Update product stock
+     */
+    public void updateStock(Integer productColorId, Integer newQuantity) {
+        Optional<Productcolor> colorOpt = productColorRepository.findById(productColorId);
+        if (colorOpt.isPresent()) {
+            Productcolor color = colorOpt.get();
+            color.setQuantity(newQuantity);
+            productColorRepository.save(color);
+        }
+    }
 }

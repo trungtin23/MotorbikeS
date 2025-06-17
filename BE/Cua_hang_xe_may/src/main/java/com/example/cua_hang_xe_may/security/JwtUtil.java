@@ -1,5 +1,6 @@
 package com.example.cua_hang_xe_may.security;
 
+import com.example.cua_hang_xe_may.entities.Role;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -21,6 +22,11 @@ public class JwtUtil {
                 .expiration(new Date(System.currentTimeMillis() + EXPIRATION_TIME))
                 .signWith(key)
                 .compact();
+    }
+
+    // Overloaded method to accept Role enum
+    public static String generateToken(String username, Role role) {
+        return generateToken(username, role.getAuthority());
     }
 
     public static String getUsernameFromToken(String token) {
