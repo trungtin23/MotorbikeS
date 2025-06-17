@@ -38,9 +38,11 @@ public class CommentController {
     @Autowired
     private ProductColorRepository productColorRepository;
 
-    // Lấy comments của sản phẩm
-    @GetMapping("/product/{productId}")
-    public ResponseEntity<List<CommentDTO>> getProductComments(@PathVariable Integer productId) {
+    // ============= PUBLIC ENDPOINTS =============
+    
+    // Lấy comments của sản phẩm (public access)
+    @GetMapping("/public/product/{productId}")
+    public ResponseEntity<List<CommentDTO>> getProductCommentsPublic(@PathVariable Integer productId) {
         List<Comment> comments = commentRepository.findByProductIdOrderByCreatedDesc(productId);
         
         List<CommentDTO> commentDTOs = comments.stream().map(comment -> {
@@ -58,9 +60,9 @@ public class CommentController {
         return ResponseEntity.ok(commentDTOs);
     }
 
-    // Lấy thống kê rating của sản phẩm
-    @GetMapping("/product/{productId}/rating-stats")
-    public ResponseEntity<Map<String, Object>> getProductRatingStats(@PathVariable Integer productId) {
+    // Lấy thống kê rating của sản phẩm (public access)
+    @GetMapping("/public/product/{productId}/rating-stats")
+    public ResponseEntity<Map<String, Object>> getProductRatingStatsPublic(@PathVariable Integer productId) {
         Map<String, Object> stats = new HashMap<>();
         
         // Rating trung bình
@@ -90,6 +92,20 @@ public class CommentController {
         stats.put("ratingDistribution", ratingCount);
         
         return ResponseEntity.ok(stats);
+    }
+
+    // ============= AUTHENTICATED ENDPOINTS =============
+    
+    // Lấy comments của sản phẩm (backward compatibility)
+    @GetMapping("/product/{productId}")
+    public ResponseEntity<List<CommentDTO>> getProductComments(@PathVariable Integer productId) {
+        return getProductCommentsPublic(productId);
+    }
+
+    // Lấy thống kê rating của sản phẩm (backward compatibility)
+    @GetMapping("/product/{productId}/rating-stats")
+    public ResponseEntity<Map<String, Object>> getProductRatingStats(@PathVariable Integer productId) {
+        return getProductRatingStatsPublic(productId);
     }
 
     // Kiểm tra user có thể đánh giá sản phẩm không

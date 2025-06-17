@@ -85,6 +85,7 @@ public class AccountServiceImpl implements AccountService {
         account.setEmail(dto.getEmail());
         account.setRole(dto.getRole());
         account.setStatus(dto.getStatus());
+        account.setSecurityCode("SERVICE_CREATED"); // Default security code for service-created accounts
         account.setName(dto.getName());
         account.setDob(dto.getDob());
         account.setAddress(dto.getAddress());
