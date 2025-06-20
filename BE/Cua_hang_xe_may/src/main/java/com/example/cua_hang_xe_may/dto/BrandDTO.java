@@ -1,9 +1,18 @@
 package com.example.cua_hang_xe_may.dto;
 
+import jakarta.validation.constraints.*;
+
 public class BrandDTO {
     private Integer id;
+    
+    @NotBlank(message = "Tên thương hiệu không được để trống")
+    @Size(min = 2, max = 100, message = "Tên thương hiệu phải có độ dài từ 2 đến 100 ký tự")
     private String name;
+    
+    @Size(max = 255, message = "URL ảnh không được vượt quá 255 ký tự")
     private String photo;
+    
+    @Size(max = 500, message = "Mô tả không được vượt quá 500 ký tự")
     private String description;
 
     public BrandDTO() {

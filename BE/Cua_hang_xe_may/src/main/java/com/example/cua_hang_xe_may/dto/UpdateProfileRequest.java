@@ -1,11 +1,19 @@
 package com.example.cua_hang_xe_may.dto;
 
+import jakarta.validation.constraints.*;
 import java.time.Instant;
 
 public class UpdateProfileRequest {
+    @Size(min = 2, max = 100, message = "Tên phải có độ dài từ 2 đến 100 ký tự")
     private String name;
+    
+    @Pattern(regexp = "^$|^[0-9]{10,11}$", message = "Số điện thoại phải có 10-11 chữ số hoặc để trống")
     private String phone;
+    
+    @Size(max = 255, message = "Địa chỉ không được vượt quá 255 ký tự")
     private String address;
+    
+    @Past(message = "Ngày sinh phải là ngày trong quá khứ")
     private Instant dob;
 
     public UpdateProfileRequest() {

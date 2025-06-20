@@ -7,6 +7,10 @@ import com.example.cua_hang_xe_may.service.ProductService;
 import com.example.cua_hang_xe_may.service.ProductVersionService;
 import com.example.cua_hang_xe_may.repositories.ProductRepository;
 import com.example.cua_hang_xe_may.repositories.ProductColorRepository;
+
+
+import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -191,7 +195,7 @@ public class ProductController {
      */
     @PostMapping("/manage")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ProductDTO create(@RequestBody ProductDTO productDTO) {
+    public ProductDTO create(@Valid @RequestBody ProductDTO productDTO) {
         return productService.save(productDTO);
     }
 
@@ -200,7 +204,8 @@ public class ProductController {
      */
     @PutMapping("/manage/{id}")
     @PreAuthorize("hasRole('ADMIN') or hasRole('MANAGER')")
-    public ResponseEntity<ProductDTO> update(@PathVariable Integer id, @RequestBody ProductDTO productDTO) {
+
+    public ResponseEntity<ProductDTO> update(@PathVariable Integer id, @Valid @RequestBody ProductDTO productDTO) {
         if (productService.findById(id) == null) {
             return ResponseEntity.notFound().build();
         }

@@ -1,12 +1,25 @@
 package com.example.cua_hang_xe_may.dto;
 
+import jakarta.validation.constraints.*;
+import jakarta.validation.Valid;
 import java.util.List;
 
 public class ProductDTO {
     private Integer id;
+    
+    @Size(max = 255, message = "Avatar URL không được vượt quá 255 ký tự")
     private String avatar;
+    
+    @NotBlank(message = "Tên sản phẩm không được để trống")
+    @Size(min = 2, max = 200, message = "Tên sản phẩm phải có độ dài từ 2 đến 200 ký tự")
     private String name;
+    
+    @Size(max = 1000, message = "Mô tả không được vượt quá 1000 ký tự")
     private String description;
+    
+    @NotNull(message = "Giá không được để trống")
+    @DecimalMin(value = "0.0", inclusive = false, message = "Giá phải lớn hơn 0")
+    @DecimalMax(value = "999999999.99", message = "Giá không được vượt quá 999,999,999.99")
     private Double price;
     private String weight;
     private String size;
@@ -24,9 +37,18 @@ public class ProductDTO {
     private String engieType;
     private String brandName; // Chỉ lấy tên của Brand
     private String motolineName; // Chỉ lấy tên của Motoline
+    
+    @Valid
     private BrandDTO brand;
+    
+    @Valid
     private List<ProductVersionDTO> versionColors;
+    
+    @Min(value = 0, message = "Số lượng tồn kho không được âm")
     private Integer totalStock; // Tổng số lượng tồn kho
+    
+    @Pattern(regexp = "^(ACTIVE|INACTIVE|OUT_OF_STOCK)$", message = "Status phải là ACTIVE, INACTIVE hoặc OUT_OF_STOCK")
+
     private String status; // Trạng thái sản phẩm
 
     public List<ProductVersionDTO> getVersionColors() {

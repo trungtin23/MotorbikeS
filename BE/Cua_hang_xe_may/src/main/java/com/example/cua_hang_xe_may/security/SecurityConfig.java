@@ -67,23 +67,22 @@ public class SecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class)
-                .cors(cors -> cors.configurationSource(corsConfigurationSource())); // ✅ Đây là cách mới để cấu hình CORS
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()));
 
         return http.build();
     }
 
-    // ✅ Định nghĩa CorsConfigurationSource cho SecurityFilterChain
+    // Định nghĩa CorsConfigurationSource cho SecurityFilterChain
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // Allow all localhost origins regardless of port
         config.addAllowedOriginPattern("http://localhost:[*]");
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config); // Dùng /** để áp dụng toàn bộ
+        source.registerCorsConfiguration("/**", config);
         return source;
     }
 

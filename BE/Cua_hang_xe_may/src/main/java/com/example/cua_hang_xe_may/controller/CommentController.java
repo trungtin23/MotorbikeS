@@ -10,6 +10,7 @@ import com.example.cua_hang_xe_may.repositories.AccountRepository;
 import com.example.cua_hang_xe_may.repositories.CommentRepository;
 import com.example.cua_hang_xe_may.repositories.OrderDetailRepository;
 import com.example.cua_hang_xe_may.repositories.ProductColorRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -149,7 +150,7 @@ public class CommentController {
 
     // Tạo comment/đánh giá mới
     @PostMapping
-    public ResponseEntity<ApiResponse> createComment(@RequestBody CreateCommentRequest request, Principal principal) {
+    public ResponseEntity<ApiResponse> createComment(@Valid @RequestBody CreateCommentRequest request, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(401).body(new ApiResponse("Vui lòng đăng nhập để đánh giá", false));
         }
