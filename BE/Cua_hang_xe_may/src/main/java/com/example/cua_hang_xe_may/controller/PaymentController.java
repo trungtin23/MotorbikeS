@@ -10,6 +10,7 @@ import com.example.cua_hang_xe_may.service.AccountService;
 import com.example.cua_hang_xe_may.service.CartService;
 import com.example.cua_hang_xe_may.service.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -41,7 +42,7 @@ public class PaymentController {
      * Create a payment for the current user's cart
      */
     @PostMapping("/create")
-    public ResponseEntity<?> createPayment(@RequestBody PaymentRequestDTO request, Principal principal, HttpServletRequest httpRequest) {
+    public ResponseEntity<?> createPayment(@Valid @RequestBody PaymentRequestDTO request, Principal principal, HttpServletRequest httpRequest) {
         if (principal == null) {
             return ResponseEntity.status(401).body(new ApiResponse("Chưa đăng nhập", false));
         }

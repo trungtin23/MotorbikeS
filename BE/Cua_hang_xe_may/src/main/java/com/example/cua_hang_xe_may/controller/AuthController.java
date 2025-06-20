@@ -10,6 +10,7 @@ import com.example.cua_hang_xe_may.repositories.AccountRepository;
 import com.example.cua_hang_xe_may.security.JwtUtil;
 import com.example.cua_hang_xe_may.service.EmailService;
 import jakarta.mail.MessagingException;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +49,7 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<ApiResponse> login(@RequestBody AuthRequest authRequest) {
+    public ResponseEntity<ApiResponse> login(@Valid @RequestBody AuthRequest authRequest) {
         try {
             // Check if the account exists and is active before attempting authentication
             Optional<Account> accountOpt = accountRepository.findByUsername(authRequest.getUsername());
@@ -98,7 +99,7 @@ public class AuthController {
     }
 
     @PostMapping("/register")
-    public ResponseEntity<ApiResponse> register(@RequestBody RegisterRequest registerRequest) {
+    public ResponseEntity<ApiResponse> register(@Valid @RequestBody RegisterRequest registerRequest) {
         // Check if username already exists
         if (accountRepository.existsByUsername(registerRequest.getUsername())) {
             return ResponseEntity.badRequest().body(
@@ -361,7 +362,7 @@ public class AuthController {
     }
 
     @PostMapping("/forgot-password")
-    public ResponseEntity<ApiResponse> forgotPassword(@RequestBody ForgotPasswordRequest request) {
+    public ResponseEntity<ApiResponse> forgotPassword(@Valid @RequestBody ForgotPasswordRequest request) {
         String email = request.getEmail();
         if (email == null || email.isEmpty()) {
             return ResponseEntity.badRequest().body(
@@ -398,7 +399,7 @@ public class AuthController {
     }
 
     @PostMapping("/reset-password")
-    public ResponseEntity<ApiResponse> resetPassword(@RequestBody ResetPasswordRequest request) {
+    public ResponseEntity<ApiResponse> resetPassword(@Valid @RequestBody ResetPasswordRequest request) {
         String token = request.getToken();
         String newPassword = request.getNewPassword();
 
