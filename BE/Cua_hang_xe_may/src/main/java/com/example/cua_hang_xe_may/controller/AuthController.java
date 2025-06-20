@@ -72,17 +72,17 @@ public class AuthController {
             UserDetails userDetails = (UserDetails) authentication.getPrincipal();
 
             // Lấy role từ authorities (giả sử user chỉ có 1 role)
-            String role = userDetails.getAuthorities().stream()
+            String roleAuthority = userDetails.getAuthorities().stream()
                     .map(authority -> authority.getAuthority())
                     .findFirst()
-                    .orElse("USER"); // Mặc định là "USER" nếu không tìm thấy role
+                    .orElse("ROLE_USER"); // Mặc định là "ROLE_USER" nếu không tìm thấy role
 
             // Tạo JWT với username và role
-            String jwt = JwtUtil.generateToken(authRequest.getUsername(), role);
+            String jwt = JwtUtil.generateToken(authRequest.getUsername(), roleAuthority);
 
             Map<String, Object> data = new HashMap<>();
             data.put("token", jwt);
-            data.put("role", role);
+            data.put("role", roleAuthority);
             data.put("username", authRequest.getUsername());
 
             return ResponseEntity.ok(new ApiResponse("Login successful", true, data));

@@ -1,11 +1,15 @@
 package com.example.cua_hang_xe_may.security;
 
 import com.example.cua_hang_xe_may.entities.Account;
+import com.example.cua_hang_xe_may.entities.Role;
 import com.example.cua_hang_xe_may.repositories.AccountRepository;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+
+import java.util.Collections;
 
 
 @Service
@@ -31,31 +35,14 @@ public class CustomUserDetailsService implements UserDetailsService {
             throw new UsernameNotFoundException("Account is not active. Please verify your email.");
         }
 
-        String role = mapRole(accountData.getRole());
+        Role role = Role.fromCode(accountData.getRole());
 
-        org.springframework.security.core.userdetails.User.UserBuilder builder =
-                org.springframework.security.core.userdetails.User.withUsername(username);
-        builder.password(accountData.getPassword());
-        builder.roles(role);
-
-        return builder.build();
+        return org.springframework.security.core.userdetails.User.builder()
+                .username(username)
+                .password(accountData.getPassword())
+                .authorities(Collections.singletonList(new SimpleGrantedAuthority(role.getAuthority())))
+                .build();
     }
 
-    private String mapRole(String roleValue) {
-        if (roleValue == null) {
-            return "USER";
-        }
-        switch (roleValue) {
-            case "0":
-                return "ADMIN";
-            case "1":
-                return "USER";
-            case "2":
-                return "MANAGER";
-            case "3":
-                return "GUEST";
-            default:
-                return "USER";
-        }
-    }
+
 }

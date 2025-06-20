@@ -10,31 +10,31 @@ import {
   Activity,
   User,
 } from "lucide-react";
-
+import {useTranslation} from "react-i18next";
 export default function HondaHomepage() {
   const [currentSlide, setCurrentSlide] = useState(0);
-
+  const { t, i18n } = useTranslation();
   const banners = [
     {
       id: 1,
       image: "honda.jpg",
       title: "HONDA SH150i",
-      subtitle: "Xe cao cấp, đẳng cấp mới",
-      cta: "Khám phá ngay",
+      subtitle: t("honda.subtitle"),
+      cta: t("honda.cta"),
     },
     {
       id: 2,
       image: "hondabg1.png",
       title: "WINNER-X",
-      subtitle: "Công nghệ vượt trội, thiết kế đột phá",
-      cta: "Tìm hiểu thêm",
+      subtitle: t("winner.subtitle"),
+      cta: t("winner.cta"),
     },
     {
       id: 3,
       image: "hondabg2.jpg",
       title: "ICON e",
-      subtitle: "Dẫn đầu xu hướng, đầy uy lực",
-      cta: "Khám phá ngay",
+      subtitle: t("icon.subtitle"),
+      cta: t("icon.cta"),
     },
   ];
 
@@ -160,7 +160,7 @@ export default function HondaHomepage() {
       {/* Product Categories */}
       <div className="container mx-auto py-12 px-4">
         <h2 className="text-3xl font-bold text-gray-800 mb-8 text-center">
-          Danh mục sản phẩm
+          {t("categories.title")}
         </h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
           {productCategories.map((category) => (

@@ -54,7 +54,7 @@ export default function ProductDetail() {
     try {
       console.log("Fetching comments for product:", id);
       const response = await axios.get(
-        `http://localhost:8080/api/comments/product/${id}`
+        `http://localhost:8080/api/comments/public/product/${id}`
       );
       console.log("Comments response:", response.data);
       setComments(response.data);
@@ -68,7 +68,7 @@ export default function ProductDetail() {
     try {
       console.log("Fetching rating stats for product:", id);
       const response = await axios.get(
-        `http://localhost:8080/api/comments/product/${id}/rating-stats`
+        `http://localhost:8080/api/comments/public/product/${id}/rating-stats`
       );
       console.log("Rating stats response:", response.data);
       setRatingStats(response.data);
@@ -188,7 +188,7 @@ export default function ProductDetail() {
     async function fetchProductDetail() {
       try {
         setLoading(true);
-        const res = await axios.get(`http://localhost:8080/api/products/${id}`);
+        const res = await axios.get(`http://localhost:8080/api/products/public/${id}`);
         console.log("Dữ liệu API:", res.data);
         setProduct(res.data.product);
         setVersionColors(res.data.product.versionColors);

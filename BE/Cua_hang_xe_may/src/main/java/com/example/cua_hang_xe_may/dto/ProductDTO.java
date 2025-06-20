@@ -26,6 +26,8 @@ public class ProductDTO {
     private String motolineName; // Chỉ lấy tên của Motoline
     private BrandDTO brand;
     private List<ProductVersionDTO> versionColors;
+    private Integer totalStock; // Tổng số lượng tồn kho
+    private String status; // Trạng thái sản phẩm
 
     public List<ProductVersionDTO> getVersionColors() {
         return versionColors;
@@ -41,6 +43,22 @@ public class ProductDTO {
 
     public void setBrand(BrandDTO brand) {
         this.brand = brand;
+    }
+
+    public Integer getTotalStock() {
+        return totalStock;
+    }
+
+    public void setTotalStock(Integer totalStock) {
+        this.totalStock = totalStock;
+    }
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     // Getters và Setters

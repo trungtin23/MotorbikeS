@@ -36,7 +36,7 @@ export default function ScooterListingPage() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
-        const response = await api.get("/products");
+        const response = await api.get("/products/public");
         setProducts(response.data);
         setError(null);
       } catch (err) {

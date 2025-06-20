@@ -2,6 +2,7 @@ import React, { useContext, useState } from "react";
 import { Search, User, MapPin, Phone } from "lucide-react";
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../Components/contexts/GetUser.jsx";
+import {useTranslation} from "react-i18next";
 // Import context để lấy thông tin người dùng
 
 const Header = () => {
@@ -20,7 +21,12 @@ const Header = () => {
     setShowMenu(false);
     navigate("/login");
   };
+//import i18n
+  const { t, i18n } = useTranslation();
 
+  const changeLanguage = (lng) => {
+    i18n.changeLanguage(lng);
+  };
   // Hàm kiểm tra đường dẫn hiện tại để áp dụng style active
   const isActive = (path) => {
     if (path === "/") return currentPath === "/";
@@ -79,9 +85,24 @@ const Header = () => {
                 Tuyển dụng
               </a>
               <div className="flex items-center text-gray-600">
-                <span className="mr-2">VN</span>
+                <button onClick={() => changeLanguage("vi")}
+                        className={`px-3 py-1 border-2 rounded text-sm transition duration-200 ${
+                            i18n.language === "vi"
+                                ? "text-red-600 border-red-600"
+                                : "text-gray-700 border-gray-300 hover:text-red-600 hover:border-red-600"
+                        }`}
+                >VN
+                </button>
                 <span>|</span>
-                <span className="ml-2">EN</span>
+                <button onClick={() => changeLanguage("en")}
+                        className={`px-3 py-1 border-2 rounded text-sm transition duration-200 ${
+                            i18n.language === "en"
+                                ? "text-red-600 border-red-600"
+                                : "text-gray-700 border-gray-300 hover:text-red-600 hover:border-red-600"
+                        }`}
+                >
+                  English
+                </button>
               </div>
             </div>
           </div>
@@ -106,20 +127,20 @@ const Header = () => {
             {/* Main Navigation */}
             <nav className="hidden md:flex space-x-8">
               {mainNavItems.map((item) => (
-                <a
-                  key={item.path}
-                  href={item.path}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    navigate(item.path);
-                  }}
-                  className={`font-medium border-b-2 py-5 ${
+                  <a
+                      key={item.path}
+                      href={item.path}
+                      onClick={(e) => {
+                        e.preventDefault();
+                        navigate(item.path);
+                      }}
+                      className={`font-medium border-b-2 py-5 ${
                     isActive(item.path)
                       ? "text-red-600 border-red-600"
                       : "text-gray-700 hover:text-red-600 border-transparent hover:border-red-600"
                   }`}
                 >
-                  {item.name}
+                    {t(item.name)}
                 </a>
               ))}
             </nav>
@@ -151,6 +172,12 @@ const Header = () => {
                           className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
                         >
                           Giỏ hàng của bạn
+                        </a>
+                        <a
+                          href="/admin"
+                          className="block px-4 py-2 text-gray-700 hover:bg-gray-100"
+                        >
+                          Admin Dashboard
                         </a>
                         <button
                           onClick={handleLogout}
@@ -193,7 +220,7 @@ const Header = () => {
                     : "text-gray-700 hover:text-red-600"
                 }`}
               >
-                {item.name}
+                {t(item.name)}
               </a>
             ))}
           </div>
