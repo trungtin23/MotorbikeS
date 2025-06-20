@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Search, Filter, ArrowRight } from "lucide-react";
-import {Link} from "react-router-dom"
+import { Link } from "react-router-dom";
 import axios from "axios";
 import ScrollRestoration from "./ScrollRestoration.jsx";
 
@@ -11,7 +11,6 @@ export default function ScooterListingPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // Tabs for filtering motorcycles by category
   const tabs = [
     { id: "all", label: "Tất cả", isActive: true },
     { id: "xe ga", label: "Xe tay ga", isActive: false },
@@ -21,7 +20,6 @@ export default function ScooterListingPage() {
     { id: "xe điện", label: "Xe điện", isActive: false },
   ];
 
-  // Thiết lập instance Axios với cấu hình cơ bản
   const api = axios.create({
     baseURL: "http://localhost:8080/api",
     timeout: 10000,
@@ -31,7 +29,7 @@ export default function ScooterListingPage() {
     },
   });
 
-  // Fetch products from API using Axios
+  // Fetch products
   useEffect(() => {
     const fetchProducts = async () => {
       try {
@@ -152,39 +150,41 @@ export default function ScooterListingPage() {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
             {filteredProducts.length > 0 ? (
               filteredProducts.map((product) => (
-                  <Link  key={product.id} to={`/productdetail/${product.id}`} className="block">
-                <div
-                  className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+                <Link
+                  key={product.id}
+                  to={`/productdetail/${product.id}`}
+                  className="block"
                 >
-                  {/*Product*/}
-                  <div className="p-4 text-center">
-                    <h3 className="text-xl font-bold mb-4">{product.name}</h3>
-                    <img
-                      src={
-                        product.avatar
-                          ? `http://localhost:8080/api/files/${product.avatar}`
-                          : "/api/placeholder/300/200"
-                      }
-                      alt={product.name}
-                      className="w-full h-48 object-contain mb-4"
-                    />
-                    <div className="flex flex-col gap-2">
-                      <div className="flex items-center justify-center gap-2">
-                        <span className="text-gray-600">Giá từ:</span>
-                        <span className="font-bold">
-                          {formatPrice(product.price)}
-                        </span>
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        {product.description}
-                      </div>
-                      <div className="text-sm text-gray-600">
-                        Hãng: {product.brandName}
+                  <div className="border border-gray-200 rounded-lg overflow-hidden hover:shadow-md transition-shadow">
+                    {/*Product*/}
+                    <div className="p-4 text-center">
+                      <h3 className="text-xl font-bold mb-4">{product.name}</h3>
+                      <img
+                        src={
+                          product.avatar
+                            ? `http://localhost:8080/api/files/${product.avatar}`
+                            : "/api/placeholder/300/200"
+                        }
+                        alt={product.name}
+                        className="w-full h-48 object-contain mb-4"
+                      />
+                      <div className="flex flex-col gap-2">
+                        <div className="flex items-center justify-center gap-2">
+                          <span className="text-gray-600">Giá từ:</span>
+                          <span className="font-bold">
+                            {formatPrice(product.price)}
+                          </span>
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          {product.description}
+                        </div>
+                        <div className="text-sm text-gray-600">
+                          Hãng: {product.brandName}
+                        </div>
                       </div>
                     </div>
                   </div>
-                </div>
-                  </Link>
+                </Link>
               ))
             ) : (
               <div className="col-span-full text-center text-gray-600 py-8">

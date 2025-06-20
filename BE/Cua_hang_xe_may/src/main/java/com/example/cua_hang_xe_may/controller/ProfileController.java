@@ -11,6 +11,7 @@ import com.example.cua_hang_xe_may.repositories.AccountRepository;
 import com.example.cua_hang_xe_may.repositories.OrderDetailRepository;
 import com.example.cua_hang_xe_may.repositories.OrderRepository;
 import com.example.cua_hang_xe_may.service.AccountService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -90,7 +91,7 @@ public class ProfileController {
     }
 
     @PutMapping
-    public ResponseEntity<ApiResponse> updateProfile(@RequestBody UpdateProfileRequest request, Principal principal) {
+    public ResponseEntity<ApiResponse> updateProfile(@Valid @RequestBody UpdateProfileRequest request, Principal principal) {
         if (principal == null) {
             return ResponseEntity.status(401).body(new ApiResponse("Chưa đăng nhập", false));
         }
