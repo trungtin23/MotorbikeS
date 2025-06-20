@@ -7,7 +7,9 @@ import com.example.cua_hang_xe_may.entities.Account;
 import com.example.cua_hang_xe_may.entities.Role;
 import com.example.cua_hang_xe_may.repositories.AccountRepository;
 import com.example.cua_hang_xe_may.security.RoleChecker;
+
 import jakarta.validation.Valid;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -84,6 +86,7 @@ public class AdminController {
      * Create new user (Admin only)
      */
     @PostMapping("/users")
+
     public ResponseEntity<?> createUser(@Valid @RequestBody CreateUserRequest createUserRequest) {
         System.out.println("Admin createUser endpoint accessed");
         System.out.println("Current user: " + roleChecker.getCurrentUsername());

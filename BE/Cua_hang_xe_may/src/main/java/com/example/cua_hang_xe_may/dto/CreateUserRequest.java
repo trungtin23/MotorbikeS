@@ -1,6 +1,17 @@
 package com.example.cua_hang_xe_may.dto;
 
 import lombok.Data;
+
+@Data
+public class CreateUserRequest {
+    private String username;
+    private String password;
+    private String email;
+    private String phone;
+    private String name;
+    private String address;
+    private String role;
+
 import jakarta.validation.constraints.*;
 
 @Data
@@ -33,5 +44,6 @@ public class CreateUserRequest {
     
     @NotBlank(message = "Status không được để trống")
     @Pattern(regexp = "^(ACTIVE|INACTIVE|SUSPENDED)$", message = "Status phải là ACTIVE, INACTIVE hoặc SUSPENDED")
+
     private String status;
 } 

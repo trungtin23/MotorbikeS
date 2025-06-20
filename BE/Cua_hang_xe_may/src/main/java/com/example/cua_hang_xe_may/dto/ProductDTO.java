@@ -48,6 +48,7 @@ public class ProductDTO {
     private Integer totalStock; // Tổng số lượng tồn kho
     
     @Pattern(regexp = "^(ACTIVE|INACTIVE|OUT_OF_STOCK)$", message = "Status phải là ACTIVE, INACTIVE hoặc OUT_OF_STOCK")
+
     private String status; // Trạng thái sản phẩm
 
     public List<ProductVersionDTO> getVersionColors() {
